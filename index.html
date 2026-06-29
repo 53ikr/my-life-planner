@@ -13,6 +13,7 @@
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
+            --bg-overlay: rgba(15, 23, 42, 0.4);
         }
 
         * {
@@ -20,21 +21,98 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
         body {
             background-color: var(--bg-main);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
             color: var(--text-main);
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            position: relative;
+        }
+
+        /* Ambient blur overlay when background image is present */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-overlay);
+            z-index: -1;
+            pointer-events: none;
         }
 
         .container {
             width: 100%;
             max-width: 1100px;
+            z-index: 1;
+        }
+
+        .greeting-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        .greeting-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .editable-name {
+            border-bottom: 2px dashed var(--accent);
+            cursor: pointer;
+            padding: 0 4px;
+            outline: none;
+        }
+
+        .ai-motivation {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            border-left: 3px solid var(--accent);
+            padding-left: 12px;
+            margin-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .refresh-quote-btn {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 1.1rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .refresh-quote-btn:hover {
+            opacity: 1;
         }
 
         header {
@@ -66,8 +144,9 @@
 
         .view-btn.active, .view-btn:hover {
             background: var(--accent);
-            color: var(--bg-main);
+            color: #0f172a; /* Force dark text for visibility on light themes */
             border-color: var(--accent);
+            font-weight: 600;
         }
 
         .grid-layout {
@@ -86,6 +165,7 @@
             border-radius: 12px;
             padding: 20px;
             min-height: 400px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         .sidebar-card {
@@ -96,6 +176,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         .planner-view { display: none; }
@@ -112,7 +193,7 @@
         label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
         input, select, textarea {
-            background: var(--bg-main);
+            background: rgba(0,0,0,0.2);
             border: 1px solid var(--border);
             color: var(--text-main);
             padding: 10px;
@@ -129,15 +210,16 @@
 
         .submit-btn {
             background: var(--accent);
-            color: var(--bg-main);
+            color: #0f172a;
             border: none;
             padding: 12px;
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 5px;
+            transition: filter 0.2s;
         }
-        .submit-btn:hover { background: var(--accent-hover); }
+        .submit-btn:hover { filter: brightness(1.1); }
 
         /* Calendar Styles */
         .calendar-grid {
@@ -154,7 +236,7 @@
             padding-bottom: 5px;
         }
         .cal-day {
-            background: var(--bg-main);
+            background: rgba(0,0,0,0.15);
             border: 1px solid var(--border);
             aspect-ratio: 1;
             border-radius: 6px;
@@ -177,20 +259,88 @@
             align-self: center;
         }
 
-        /* Task & Goal Lists */
         .item-list { list-style: none; margin-top: 10px; }
         .item-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-main);
+            background: rgba(0,0,0,0.15);
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 8px;
             border: 1px solid var(--border);
+            transition: transform 0.2s;
         }
-        .item-left { display: flex; flex-direction: column; gap: 4px; }
-        .item-title { font-weight: 500; }
+        .item-row:hover {
+            transform: translateY(-1px);
+        }
+        .item-left { display: flex; align-items: center; gap: 12px; }
+        
+        /* Interactive Custom Checkbox styling */
+        .checkbox-container {
+            display: block;
+            position: relative;
+            padding-left: 25px;
+            cursor: pointer;
+            font-size: 22px;
+            user-select: none;
+        }
+        .checkbox-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        .checkmark {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            height: 18px;
+            width: 18px;
+            background-color: transparent;
+            border: 2px solid var(--text-muted);
+            border-radius: 4px;
+        }
+        .checkbox-container:hover input ~ .checkmark {
+            border-color: var(--accent);
+        }
+        .checkbox-container input:checked ~ .checkmark {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+        .checkbox-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+        .checkbox-container .checkmark:after {
+            left: 5px;
+            top: 1px;
+            width: 4px;
+            height: 9px;
+            border: solid #0f172a;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .task-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .item-title { 
+            font-weight: 500; 
+            transition: color 0.2s, text-decoration 0.2s;
+        }
+        .item-row.completed-task .item-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
         .item-meta { font-size: 0.75rem; color: var(--text-muted); }
         .delete-btn {
             background: transparent;
@@ -198,6 +348,7 @@
             border: none;
             cursor: pointer;
             font-size: 0.9rem;
+            padding: 5px;
         }
 
         .view-title-header {
@@ -206,11 +357,92 @@
             align-items: center;
             margin-bottom: 15px;
         }
+
+        .theme-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        .theme-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .theme-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .color-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+        .color-chip {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .color-chip.active {
+            border-color: var(--text-main);
+            transform: scale(1.1);
+        }
+        .file-upload-btn {
+            background: rgba(0,0,0,0.2);
+            border: 1px dashed var(--border);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+        .file-upload-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+        .toggle-mode-btn {
+            width: 100%;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .toggle-mode-btn:hover {
+            border-color: var(--accent);
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- GREETING & MOTIVATION BANNER -->
+    <div class="greeting-card">
+        <div class="greeting-title">
+            <span id="time-greeting">Welcome back,</span>
+            <span class="editable-name" id="user-name" contenteditable="true" onblur="saveUserName()" title="Double click to edit your name">Planner</span>
+            <span>⚡</span>
+        </div>
+        <div class="ai-motivation">
+            <span id="ai-quote">Initializing motivation matrix...</span>
+            <button class="refresh-quote-btn" onclick="generateAIQuote()" title="Refresh motivation quote">🔄</button>
+        </div>
+    </div>
+
     <header>
         <div>
             <h1 id="current-date-display">Loading...</h1>
@@ -261,42 +493,69 @@
         </main>
 
         <!-- Sidebar Creator Panel -->
-        <aside class="sidebar-card">
-            <h3>Task & Focus Engine</h3>
-            
-            <div class="form-group">
-                <label for="task-title">Action Item Title</label>
-                <input type="text" id="task-title" placeholder="Workout, Coding block, Study session...">
-            </div>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <aside class="sidebar-card">
+                <h3>Task & Focus Engine</h3>
+                
+                <div class="form-group">
+                    <label for="task-title">Action Item Title</label>
+                    <input type="text" id="task-title" placeholder="Workout, Coding block, Study session...">
+                </div>
 
-            <div class="row-inputs">
-                <div class="form-group">
-                    <label for="task-date">Target Date</label>
-                    <input type="date" id="task-date">
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label for="task-date">Target Date</label>
+                        <input type="date" id="task-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-duration">Duration (Hours)</label>
+                        <input type="number" id="task-duration" min="0.5" max="24" step="0.5" value="1">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="task-duration">Duration (Hours)</label>
-                    <input type="number" id="task-duration" min="0.5" max="24" step="0.5" value="1">
+
+                <div class="row-inputs">
+                    <div class="form-group">
+                        <label for="task-repeat">Recurrence</label>
+                        <select id="task-repeat">
+                            <option value="none">One-time</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-repeat-count">Repeat Count</label>
+                        <input type="number" id="task-repeat-count" min="1" max="365" value="1">
+                    </div>
+                </div>
+
+                <button class="submit-btn" onclick="saveNewTask()">Deploy to Schedule</button>
+            </aside>
+
+            <!-- THEME SWITCHER PANEL -->
+            <div class="theme-card">
+                <div class="theme-title">Theme Customizer 🎨</div>
+                <div class="theme-options">
+                    <button class="toggle-mode-btn" onclick="toggleThemeMode()" id="mode-btn">Switch to Light Theme</button>
+                    
+                    <div class="form-group">
+                        <label>Accent Highlights</label>
+                        <div class="color-chips" id="color-chips-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Custom Color Choice</label>
+                        <input type="color" id="custom-accent-color" oninput="applyCustomAccent(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Wallpaper Background</label>
+                        <label class="file-upload-btn" for="bg-upload">Upload Background Image 🖼️</label>
+                        <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
+                        <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
+                    </div>
                 </div>
             </div>
-
-            <div class="row-inputs">
-                <div class="form-group">
-                    <label for="task-repeat">Recurrence</label>
-                    <select id="task-repeat">
-                        <option value="none">One-time</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="task-repeat-count">Repeat Count</label>
-                    <input type="number" id="task-repeat-count" min="1" max="365" value="1">
-                </div>
-            </div>
-
-            <button class="submit-btn" onclick="saveNewTask()">Deploy to Schedule</button>
-        </aside>
+        </div>
     </div>
 </div>
 
@@ -306,8 +565,165 @@
     let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
     let yearGoals = JSON.parse(localStorage.getItem('planner_year_goals')) || [];
 
+    // Theme states saved to prevent losing configuration on refresh
+    let currentThemeMode = localStorage.getItem('planner_theme_mode') || 'dark';
+    let activeAccent = localStorage.getItem('planner_accent_color') || '#38bdf8';
+    let savedBgImage = localStorage.getItem('planner_bg_image') || '';
+
     // Initialize fields
     document.getElementById('task-date').value = selectedDateStr;
+
+    // AI Motivational quotes arrays
+    const aiQuotes = [
+        "Focus is a muscle. Your daily targets shape your ultimate destination.",
+        "Consistency outperforms sudden inspiration. Execute your scheduled blocks today.",
+        "Your future self is built day by day, hour by hour. Keep the promise.",
+        "Errors are proof that you are actively building. Recalibrate and move forward.",
+        "You are the master architect of your own schedule. Build a productive framework.",
+        "The best way to predict your year is to design your weeks and rule your days.",
+        "Discipline is simply choosing what you want most over what you want right now.",
+        "Small milestones achieved daily compound into monumental years.",
+        "Treat each day as a separate algorithmic code block. Optimize your runtime.",
+        "Productivity isn't about busy work; it's about focused action items.",
+        "The space between who you are and who you want to be is filled with your habits."
+    ];
+
+    // Initialize Greeting & Dynamic Time Detection
+    function loadGreetingAndQuotes() {
+        const hour = new Date().getHours();
+        let greeting = "Welcome back,";
+        if (hour >= 5 && hour < 12) {
+            greeting = "Good morning,";
+        } else if (hour >= 12 && hour < 18) {
+            greeting = "Good afternoon,";
+        } else if (hour >= 18 && hour < 22) {
+            greeting = "Good evening,";
+        } else {
+            greeting = "Good night,";
+        }
+        document.getElementById('time-greeting').innerText = greeting;
+
+        // User name
+        const savedName = localStorage.getItem('planner_user_name') || "Planner";
+        document.getElementById('user-name').innerText = savedName;
+
+        generateAIQuote();
+    }
+
+    function saveUserName() {
+        const el = document.getElementById('user-name');
+        let val = el.innerText.trim();
+        if(!val) val = "Planner";
+        localStorage.setItem('planner_user_name', val);
+        el.innerText = val;
+    }
+
+    function generateAIQuote() {
+        const randomIndex = Math.floor(Math.random() * aiQuotes.length);
+        document.getElementById('ai-quote').innerText = aiQuotes[randomIndex];
+    }
+
+    // Theme Switcher & System Color Matrix configuration
+    const colorPresets = [
+        '#38bdf8', // Sky Blue (Original)
+        '#10b981', // Emerald Green
+        '#8b5cf6', // Indigo Violet
+        '#f43f5e', // Rose Sunset
+        '#f59e0b', // Amber Orange
+        '#ffffff'  // Pure White
+    ];
+
+    function initializeThemeControls() {
+        applyThemeStyles();
+        renderThemeColorChips();
+    }
+
+    function applyThemeStyles() {
+        const root = document.documentElement;
+        if(currentThemeMode === 'dark') {
+            root.style.setProperty('--bg-main', '#0f172a');
+            root.style.setProperty('--bg-card', '#1e293b');
+            root.style.setProperty('--text-main', '#f8fafc');
+            root.style.setProperty('--text-muted', '#94a3b8');
+            root.style.setProperty('--border', '#334155');
+            root.style.setProperty('--bg-overlay', 'rgba(15, 23, 42, 0.7)');
+            document.getElementById('mode-btn').innerText = "Switch to Light Theme";
+        } else {
+            root.style.setProperty('--bg-main', '#f1f5f9');
+            root.style.setProperty('--bg-card', '#ffffff');
+            root.style.setProperty('--text-main', '#0f172a');
+            root.style.setProperty('--text-muted', '#64748b');
+            root.style.setProperty('--border', '#cbd5e1');
+            root.style.setProperty('--bg-overlay', 'rgba(255, 255, 255, 0.75)');
+            document.getElementById('mode-btn').innerText = "Switch to Dark Theme";
+        }
+
+        root.style.setProperty('--accent', activeAccent);
+        // Calculate hover colour brightness filter
+        root.style.setProperty('--accent-hover', activeAccent);
+
+        // Background Image configuration
+        if(savedBgImage) {
+            document.body.style.backgroundImage = `url(${savedBgImage})`;
+        } else {
+            document.body.style.backgroundImage = 'none';
+        }
+    }
+
+    function toggleThemeMode() {
+        currentThemeMode = currentThemeMode === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('planner_theme_mode', currentThemeMode);
+        applyThemeStyles();
+    }
+
+    function renderThemeColorChips() {
+        const container = document.getElementById('color-chips-container');
+        container.innerHTML = '';
+        colorPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === activeAccent) chip.classList.add('active');
+            chip.onclick = () => {
+                activeAccent = color;
+                localStorage.setItem('planner_accent_color', color);
+                applyThemeStyles();
+                renderThemeColorChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-accent-color').value = activeAccent;
+    }
+
+    function applyCustomAccent(val) {
+        activeAccent = val;
+        localStorage.setItem('planner_accent_color', val);
+        applyThemeStyles();
+        renderThemeColorChips();
+    }
+
+    function uploadBackgroundImage(input) {
+        const file = input.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            savedBgImage = e.target.result;
+            try {
+                localStorage.setItem('planner_bg_image', savedBgImage);
+                applyThemeStyles();
+            } catch(error) {
+                alert("This image is too large! Please choose a smaller image (under 3MB) to prevent storage limits.");
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeBackgroundImage() {
+        savedBgImage = '';
+        localStorage.removeItem('planner_bg_image');
+        applyThemeStyles();
+    }
 
     function formatDisplayDate(dateObj) {
         return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -322,7 +738,10 @@
         document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
         
         document.getElementById(`${viewName}-view`).classList.add('active');
-        event.currentTarget.classList.add('active');
+        // Find click origin button manually for stability
+        const btns = Array.from(document.querySelectorAll('.view-btn'));
+        const activeBtn = btns.find(b => b.innerText.toLowerCase().includes(viewName));
+        if (activeBtn) activeBtn.classList.add('active');
 
         if(viewName === 'month') renderCalendarMatrix();
         if(viewName === 'day') renderDayTasks();
@@ -351,7 +770,8 @@
                 date: dateStr,
                 duration,
                 repeatType: repeat,
-                instance: i + 1
+                instance: i + 1,
+                completed: false // Added checklist logical tracker
             });
 
             if (repeat === 'daily') {
@@ -365,6 +785,19 @@
 
         localStorage.setItem('planner_tasks', JSON.stringify(tasks));
         document.getElementById('task-title').value = '';
+        renderDayTasks();
+        renderCalendarMatrix();
+    }
+
+    // Checklist completion toggler logic
+    function toggleTaskCompletion(id) {
+        tasks = tasks.map(t => {
+            if (t.id === id) {
+                return { ...t, completed: !t.completed };
+            }
+            return t;
+        });
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
         renderDayTasks();
         renderCalendarMatrix();
     }
@@ -386,10 +819,19 @@
         filtered.forEach(t => {
             const li = document.createElement('li');
             li.className = 'item-row';
+            if (t.completed) {
+                li.classList.add('completed-task');
+            }
             li.innerHTML = `
                 <div class="item-left">
-                    <span class="item-title">${t.title}</span>
-                    <span class="item-meta">⏱️ ${t.duration} hrs ${t.repeatType !== 'none' ? `| Inst. #${t.instance}` : ''}</span>
+                    <label class="checkbox-container">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTaskCompletion('${t.id}')">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-content">
+                        <span class="item-title">${t.title}</span>
+                        <span class="item-meta">⏱️ ${t.duration} hrs ${t.repeatType !== 'none' ? `| Inst. #${t.instance}` : ''}</span>
+                    </div>
                 </div>
                 <button class="delete-btn" onclick="deleteTask('${t.id}')">✕</button>
             `;
@@ -442,10 +884,17 @@
 
             dayDiv.innerHTML = `<span>${day}</span>`;
 
-            const hasTasks = tasks.some(t => t.date === loopDateStr);
+            const dayTasks = tasks.filter(t => t.date === loopDateStr);
+            const hasTasks = dayTasks.length > 0;
+            const allCompleted = hasTasks && dayTasks.every(t => t.completed);
+
             if (hasTasks) {
                 const dot = document.createElement('div');
                 dot.className = 'dot-indicator';
+                if(allCompleted) {
+                    dot.style.backgroundColor = 'var(--text-muted)';
+                    dot.style.opacity = '0.4';
+                }
                 dayDiv.appendChild(dot);
             }
 
@@ -496,6 +945,8 @@
 
     // Initial load configurations
     updateHeaderDate();
+    loadGreetingAndQuotes();
+    initializeThemeControls();
     renderDayTasks();
 </script>
 </body>
