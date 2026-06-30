@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,407 +8,676 @@
     <style>
         :root {
             --bg-main: #0f172a;
-            --bg-card: rgba(30, 41, 59, 1);
+            --bg-card: rgba(30, 41, 59, 0.85); /* Default with initial transparency */
             --accent: #38bdf8;
             --accent-hover: #0ea5e9;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
-            --card-opacity: 1;
+            --bg-overlay: rgba(15, 23, 42, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
 
-        body {
-            background-color: var(--bg-main);
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: var(--text-main);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            position: relative;
-        }
+    body {
+        background-color: var(--bg-main);
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        color: var(--text-main);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        position: relative;
+    }
 
-        .bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(4px);
-            z-index: -1;
-            display: none;
-        }
+    /* Ambient blur overlay when background image is present */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-overlay);
+        z-index: -1;
+        pointer-events: none;
+    }
 
-        .container {
-            width: 100%;
-            max-width: 1100px;
-            z-index: 1;
-        }
+    .container {
+        width: 100%;
+        max-width: 1100px;
+        z-index: 1;
+    }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 25px;
-            background: rgba(15, 23, 42, 0.6);
-            padding: 15px;
-            border-radius: 12px;
-        }
+    .greeting-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        backdrop-filter: blur(8px);
+    }
 
-        .greeting-section h1 {
-            font-size: 1.8rem;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
+    .greeting-title {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(to right, #ffffff, var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
 
-        .name-input {
-            background: transparent;
-            border: none;
-            border-bottom: 1px dashed var(--accent);
-            color: var(--text-main);
-            font-size: 1.8rem;
-            font-weight: bold;
-            width: 140px;
-            padding: 0 5px;
-            outline: none;
-        }
+    .editable-name {
+        border-bottom: 2px dashed var(--accent);
+        cursor: pointer;
+        padding: 0 4px;
+        outline: none;
+    }
 
-        .motivation-banner {
-            background: rgba(56, 189, 248, 0.1);
-            border-left: 4px solid var(--accent);
-            padding: 15px;
-            border-radius: 4px 12px 12px 4px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .ai-motivation {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        font-style: italic;
+        border-left: 3px solid var(--accent);
+        padding-left: 12px;
+        margin-top: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .views-nav {
-            display: flex;
-            gap: 10px;
-        }
+    .refresh-quote-btn {
+        background: transparent;
+        border: none;
+        color: var(--accent);
+        cursor: pointer;
+        font-size: 1.1rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+ }
+    .refresh-quote-btn:hover {
+        opacity: 1;
+    }
 
-        .view-btn {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 25px;
+    }
 
-        .view-btn.active, .view-btn:hover {
-            background: var(--accent);
-            color: #0f172a;
-            border-color: var(--accent);
-        }
+    h1 { font-size: 1.8rem; color: var(--accent); }
 
-        .grid-layout {
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 25px;
-        }
+    .views-nav {
+        display: flex;
+        gap: 10px;
+    }
 
-        @media (max-width: 900px) {
-            .grid-layout { grid-template-columns: 1fr; }
-        }
+    .view-btn {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        backdrop-filter: blur(8px);
+    }
 
-        .main-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            min-height: 400px;
-        }
+    .view-btn.active, .view-btn:hover {
+        background: var(--accent);
+        color: #0f172a; /* Force dark text for visibility */
+        border-color: var(--accent);
+        font-weight: 600;
+    }
 
-        .sidebar-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 25px;
+    }
 
-        .planner-view { display: none; }
-        .planner-view.active { display: block; }
+    @media (max-width: 900px) {
+        .grid-layout { grid-template-columns: 1fr; }
+    }
 
-        /* Form Inputs */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
+    .main-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        min-height: 400px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        backdrop-filter: blur(8px);
+    }
 
-        label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .sidebar-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        backdrop-filter: blur(8px);
+    }
+ .planner-view { display: none; }
+    .planner-view.active { display: block; }
 
-        input, select, textarea {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-        }
-        input:focus { border-color: var(--accent); }
+    /* Form Inputs */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
 
-        .row-inputs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
+    label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
 
-        .submit-btn {
-            background: var(--accent);
-            color: #0f172a;
-            border: none;
-            padding: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-        .submit-btn:hover { background: var(--accent-hover); }
+    input, select, textarea {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 10px;
+        border-radius: 6px;
+        outline: none;
+    }
+    input:focus { border-color: var(--accent); }
 
-        /* Suggestions Box */
-        .suggestions-container {
-            border: 1px dashed var(--border);
-            padding: 12px;
-            border-radius: 8px;
-            background: rgba(15, 23, 42, 0.3);
-        }
-        .suggestion-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .sug-chip {
-            background: rgba(56, 189, 248, 0.15);
-            border: 1px solid var(--accent);
-            color: var(--text-main);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        .sug-chip:hover {
-            background: var(--accent);
-            color: #0f172a;
-        }
+    .row-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
 
-        /* Tasks with Checkbox */
-        .item-list { list-style: none; margin-top: 10px; }
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(15, 23, 42, 0.5);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            border: 1px solid var(--border);
-        }
-        .item-left { display: flex; align-items: center; gap: 12px; }
-        .item-text-group { display: flex; flex-direction: column; gap: 2px; }
-        .item-title { font-weight: 500; }
-        .item-title.completed { text-decoration: line-through; color: var(--text-muted); }
-        .item-meta { font-size: 0.75rem; color: var(--text-muted); }
-        .delete-btn {
-            background: transparent;
-            color: #ef4444;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
+    .submit-btn {
+        background: var(--accent);
+        color: #0f172a;
+        border: none;
+        padding: 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 5px;
+        transition: filter 0.2s, background-color 0.2s;
+    }
+    .submit-btn:hover { filter: brightness(1.1); }
 
-        /* Calendar Styles */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin-top: 15px;
-        }
-        .cal-header {
-            text-align: center;
-            font-weight: bold;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-        .cal-day {
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid var(--border);
-            aspect-ratio: 1;
-            border-radius: 6px;
-            padding: 6px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .cal-day:hover, .cal-day.selected { border-color: var(--accent); }
-        .cal-day.today { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); }
-        .dot-indicator {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            align-self: center;
-        }
+    /* Calendar Styles */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        margin-top: 15px;
+    }
+    .cal-header {
+        text-align: center;
+        font-weight: bold;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        padding-bottom: 5px;
+    }
+    .cal-day {
+        background: rgba(0,0,0,0.15);
+        border: 1px solid var(--border);
+        aspect-ratio: 1;
+        border-radius: 6px;
+        padding: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .cal-day:hover, .cal-day.selected { border-color: var(--accent); }
+    .cal-day.today { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); }
+    .dot-indicator {
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        margin-top: auto;
+        align-self: center;
+    }
 
-        /* Floating Heart Portal Modal */
-        .heart-btn {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 55px;
-            height: 55px;
-            background: #f43f5e;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
-            border: none;
-            z-index: 10;
-            transition: transform 0.2s;
-        }
-        .heart-btn:hover { transform: scale(1.1); }
+    .item-list { list-style: none; margin-top: 10px; }
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0,0,0,0.15);
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        border: 1px solid var(--border);
+        transition: transform 0.2s;
+    }
+    .item-row:hover {
+        transform: translateY(-1px);
+    }
+    .item-left { display: flex; align-items: center; gap: 12px; }
+    
+    /* Interactive Custom Checkbox styling */
+    .checkbox-container {
+        display: block;
+        position: relative;
+        padding-left: 25px;
+        cursor: pointer;
+        font-size: 22px;
+        user-select: none;
+    }
+    .checkbox-container input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+    .checkmark {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        height: 18px;
+        width: 18px;
+        background-color: transparent;
+        border: 2px solid var(--text-muted);
+        border-radius: 4px;
+    }
+    .checkbox-container:hover input ~ .checkmark {
+        border-color: var(--accent);
+    }
+    .checkbox-container input:checked ~ .checkmark {
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+    .checkmark:after {
+        content: "";
+        position: absolute;
+        display: none;
+    }
+    .checkbox-container input:checked ~ .checkmark:after {
+        display: block;
+    }
+    .checkbox-container .checkmark:after {
+        left: 5px;
+        top: 1px;
+        width: 4px;
+        height: 9px;
+        border: solid #0f172a;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        .modal-card {
-            background: #1e293b;
-            border: 1px solid #334155;
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 10px;
-        }
-        .close-modal { background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
-    </style>
+    .task-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .item-title { 
+        font-weight: 500; 
+        transition: color 0.2s, text-decoration 0.2s;
+    }
+    .item-row.completed-task .item-title {
+        text-decoration: line-through;
+        color: var(--text-muted);
+    }
+    .item-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .delete-btn {
+        background: transparent;
+        color: #ef4444;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 5px;
+    }
+
+    .view-title-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    /* Theme Settings Modal Styles */
+    .theme-btn-fab {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #0f172a;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.8rem;
+        z-index: 999;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: pulse-heart 2.5s infinite;
+    }
+    .theme-btn-fab:hover {
+        transform: scale(1.15) rotate(10deg);
+    }
+
+    @keyframes pulse-heart {
+        0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+        70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .theme-modal-card {
+        background: #1e293b;
+        border: 1px solid #334155;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 480px;
+        padding: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .modal-overlay.active .theme-modal-card {
+        transform: translateY(0);
+    }
+
+    .close-modal-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        cursor: pointer;
+    }
+    .close-modal-btn:hover {
+        color: var(--text-main);
+    }
+
+  .color-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+    .color-chip {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .color-chip.active {
+        border-color: #ffffff;
+        transform: scale(1.15);
+    }
+
+    .opacity-slider-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .opacity-slider-wrapper input {
+        flex: 1;
+        height: 6px;
+        background: #334155;
+        outline: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+
+    .file-upload-btn {
+        background: rgba(0,0,0,0.25);
+        border: 1px dashed var(--border);
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        text-align: center;
+        cursor: pointer;
+        color: var(--text-muted);
+        display: block;
+    }
+    .file-upload-btn:hover {
+        border-color: var(--accent);
+        color: var(--text-main);
+    }
+
+    .toggle-mode-btn {
+        width: 100%;
+        padding: 10px;
+        background: rgba(0,0,0,0.25);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-main);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .toggle-mode-btn:hover {
+        border-color: var(--accent);
+    }
+
+    /* Quick Suggestion Box Styles */
+    .suggestions-section {
+        background: rgba(0,0,0,0.15);
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    } 
+.suggestions-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .suggestion-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 150px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        padding-right: 4px;
+    }
+    .suggestion-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .suggestion-item:hover {
+        background: rgba(56, 189, 248, 0.1);
+        border-color: var(--accent);
+    }
+    .suggestion-btn-delete {
+        background: transparent;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        font-size: 0.75rem;
+        padding: 2px 5px;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+    .suggestion-btn-delete:hover {
+        opacity: 1;
+    }
+    .suggestion-add-form {
+        display: flex;
+        gap: 6px;
+    }
+    .suggestion-input {
+        flex: 1;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+    }
+    .suggestion-add-btn {
+        background: var(--accent);
+        color: #0f172a;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
+
 </head>
 <body>
 
-<div class="bg-overlay" id="custom-bg-blur"></div>
-
 <div class="container">
-    <header>
-        <div class="greeting-section">
-            <h1 id="time-greeting">Good Horizon,</h1>
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="text" id="username-display" class="name-input" value="Ikram" onchange="saveUsername()">
-                <span style="font-size: 1.8rem; font-weight: bold;">Planner</span>
-            </div>
+    <!-- GREETING & MOTIVATION BANNER -->
+    <div class="greeting-card">
+        <div class="greeting-title">
+            <span id="time-greeting">Welcome back,</span>
+            <span class="editable-name" id="user-name" contenteditable="true" onblur="saveUserName()" title="Double click to edit your name">Planner</span>
+            <span>⚡</span>
         </div>
-        <div class="views-nav">
-            <button class="view-btn active" onclick="switchView('day')">Day</button>
-            <button class="view-btn" onclick="switchView('month')">Month</button>
-            <button class="view-btn" onclick="switchView('year')">Year Goals</button>
+        <div class="ai-motivation">
+            <span id="ai-quote">Initializing motivation matrix...</span>
+            <button class="refresh-quote-btn" onclick="generateAIQuote()" title="Refresh motivation quote">🔄</button>
         </div>
-    </header>
-
-    <div class="motivation-banner">
-        <div>
-            <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent);">Focus Spark</p>
-            <p id="quote-display" style="font-style: italic; margin-top: 4px;">"Your potential is unlocked the moment you decide to map the execution."</p>
-        </div>
-        <button onclick="cycleQuote()" style="background:transparent; border:none; color:var(--accent); cursor:pointer; font-size:1.2rem; padding: 5px;">🔄</button>
     </div>
 
-    <div class="grid-layout">
-        <main class="main-card" id="el-main-card">
-            
-            <!-- DAY VIEW -->
-            <div id="day-view" class="planner-view active">
-                <div class="view-title-header">
-                    <h2 id="day-view-title">Today's Schedule</h2>
-                </div>
-                <ul id="day-tasks-list" class="item-list"></ul>
-            </div>
+<header>
+    <div>
+        <h1 id="current-date-display">Loading...</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 2px;">Your Ultimate Framework Hub</p>
+    </div>
+    <div class="views-nav">
+        <button class="view-btn active" onclick="switchView('day')">Day</button>
+        <button class="view-btn" onclick="switchView('month')">Month</button>
+        <button class="view-btn" onclick="switchView('year')">Year Goals</button>
+    </div>
+</header>
 
-            <!-- MONTH VIEW -->
-            <div id="month-view" class="planner-view">
-                <div class="view-title-header">
-                    <h2>Calendar Matrix</h2>
-                </div>
-                <div class="calendar-grid" id="calendar-matrix-container"></div>
+<div class="grid-layout">
+    <!-- Main Panel Content -->
+    <main class="main-card">
+        
+        <!-- DAY VIEW -->
+        <div id="day-view" class="planner-view active">
+            <div class="view-title-header">
+                <h2 id="day-view-title">Today's Schedule</h2>
             </div>
+            <ul id="day-tasks-list" class="item-list"></ul>
+        </div>
 
-            <!-- YEAR VIEW -->
-            <div id="year-view" class="planner-view">
-                <div class="view-title-header">
-                    <h2>Strategic Annual Targets</h2>
-                </div>
-                <div class="form-group">
-                    <label>Add Macro Year Goal</label>
-                    <div style="display:flex; gap:10px;">
-                        <input type="text" id="year-goal-input" placeholder="e.g., Launch clothing brand..." style="flex:1;">
-                        <button class="submit-btn" onclick="addYearGoal()" style="margin:0; padding:0 20px;">Add</button>
-                    </div>
-                </div>
-                <ul id="year-goals-list" class="item-list"></ul>
+        <!-- MONTH VIEW -->
+        <div id="month-view" class="planner-view">
+            <div class="view-title-header">
+                <h2 id="month-view-title">Calendar Matrix</h2>
             </div>
-        </main>
+            <div class="calendar-grid" id="calendar-matrix-container"></div>
+        </div>
 
-        <aside class="sidebar-card" id="el-sidebar-card">
-            <!-- SUGGESTIONS TAB -->
-            <div class="suggestions-container">
-                <label>Quick Suggestions Engine</label>
-                <div style="display:flex; gap:6px; margin-top:6px;">
-                    <input type="text" id="sug-input" placeholder="Custom template item..." style="padding:6px; font-size:0.85rem; flex:1;">
-                    <button onclick="addCustomSuggestion()" style="background:var(--accent); border:none; border-radius:4px; padding:0 10px; cursor:pointer;">+</button>
-                </div>
-                <div class="suggestion-chips" id="suggestion-chips-vault"></div>
+        <!-- YEAR VIEW -->
+        <div id="year-view" class="planner-view">
+            <div class="view-title-header">
+                <h2>Strategic Annual Targets</h2>
             </div>
+            <div class="form-group">
+                <label>Add Macro Year Goal</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="year-goal-input" placeholder="e.g., Launch clothing collection brand, Reach intermediate fluency..." style="flex:1;">
+                    <button class="submit-btn" onclick="addYearGoal()" style="margin:0; padding:0 20px;">Add</button>
+                </div>
+            </div>
+            <ul id="year-goals-list" class="item-list"></ul>
+        </div>
 
+    </main>
+
+    <!-- Sidebar Creator Panel -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <aside class="sidebar-card">
             <h3>Task & Focus Engine</h3>
+            
+            <!-- Quick Suggestion Box Inside Sidebar Engine -->
+            <div class="suggestions-section">
+                <div class="suggestions-title">
+                    <span>Quick Templates ⭐</span>
+                </div>
+                <div id="suggestion-list" class="suggestion-list">
+                    <!-- Templates load here -->
+                </div>
+                <div class="suggestion-add-form">
+                    <input type="text" id="suggestion-input" class="suggestion-input" placeholder="e.g. Work out, Read book...">
+                    <button type="button" class="suggestion-add-btn" onclick="addQuickSuggestion()">Add</button>
+                </div>
+            </div>
+
+            <!-- Main Task Deployer Form -->
             <div class="form-group">
                 <label for="task-title">Action Item Title</label>
-                <input type="text" id="task-title" placeholder="Workout, Coding block...">
+                <input type="text" id="task-title" placeholder="Workout, Coding block, Study session...">
             </div>
+
             <div class="row-inputs">
                 <div class="form-group">
                     <label for="task-date">Target Date</label>
@@ -418,6 +688,7 @@
                     <input type="number" id="task-duration" min="0.5" max="24" step="0.5" value="1">
                 </div>
             </div>
+
             <div class="row-inputs">
                 <div class="form-group">
                     <label for="task-repeat">Recurrence</label>
@@ -432,113 +703,407 @@
                     <input type="number" id="task-repeat-count" min="1" max="365" value="1">
                 </div>
             </div>
+
             <button class="submit-btn" onclick="saveNewTask()">Deploy to Schedule</button>
         </aside>
     </div>
 </div>
 
-<button class="heart-btn" onclick="toggleModal(true)">❤️</button>
+</div>
 
-<div class="modal-overlay" id="theme-modal">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h3>Custom Theme System</h3>
-            <button class="close-modal" onclick="toggleModal(false)">✕</button>
-        </div>
+<!-- FLOATING PORTAL TRIGGER (HEART BUTTON) -->
+
+<button class="theme-btn-fab" onclick="toggleThemeModal()" title="Customize Themes & Colors">❤️</button>
+
+<!-- THEME OVERLAY & PANEL MODAL -->
+
+<div class="modal-overlay" id="theme-modal-overlay" onclick="handleOutsideModalClick(event)">
+    <div class="theme-modal-card">
+        <button class="close-modal-btn" onclick="toggleThemeModal()">✕</button>
+        <h2 style="font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            Theme Customizer 🎨
+        </h2>
+
+    <div class="theme-options" style="display: flex; flex-direction: column; gap: 20px;">
+        <button class="toggle-mode-btn" onclick="toggleThemeMode()" id="mode-btn">Switch to Light Theme</button>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border);">
+
+        <!-- ACCENT HIGHLIGHT CONTROL -->
         <div class="form-group">
-            <label>Interface Base Background Color</label>
-            <input type="color" id="cfg-bg" value="#0f172a" onchange="applyCustomThemes()">
+            <label>Highlight Accent Colors</label>
+            <div class="color-chips" id="color-chips-container"></div>
         </div>
+
         <div class="form-group">
-            <label>Accent Highlights Color</label>
-            <input type="color" id="cfg-accent" value="#38bdf8" onchange="applyCustomThemes()">
+            <label>Custom Accent Color Choice</label>
+            <input type="color" id="custom-accent-color" oninput="applyCustomAccent(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
         </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border);">
+
+        <!-- CARD BACKGROUND COLOR CONTROL -->
         <div class="form-group">
-            <label>Card Elements Background Color</label>
-            <input type="color" id="cfg-card" value="#1e293b" onchange="applyCustomThemes()">
+            <label>Tab / Card Background Colors</label>
+            <div class="color-chips" id="card-chips-container"></div>
         </div>
+
         <div class="form-group">
-            <label>Card Transparency/Opacity (<span id="opacity-val">100</span>%)</label>
-            <input type="range" id="cfg-opacity" min="10" max="100" value="100" oninput="applyCustomThemes()">
+            <label>Custom Card Color Choice</label>
+            <input type="color" id="custom-card-color" oninput="applyCustomCardColor(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
         </div>
+
+        <!-- OPACITY SLIDER -->
         <div class="form-group">
-            <label>Upload Custom Background Wallpaper</label>
-            <input type="file" id="cfg-wallpaper" accept="image/*" onchange="uploadWallpaper()">
+            <label id="opacity-slider-label">Card Transparency: 85%</label>
+            <div class="opacity-slider-wrapper">
+                <span>0%</span>
+                <input type="range" id="card-opacity-slider" min="0" max="100" value="85" oninput="applyCardOpacity(this.value)">
+                <span>100%</span>
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border);">
+
+        <!-- WALLPAPER BACKGROUND CONTROL -->
+        <div class="form-group">
+            <label>Wallpaper Background</label>
+            <label class="file-upload-btn" for="bg-upload">Upload Background Image 🖼️</label>
+            <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
+            <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
         </div>
     </div>
 </div>
 
+</div>
+
 <script>
+    // State management and LocalStorage
     let selectedDateStr = new Date().toISOString().split('T')[0];
     let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
     let yearGoals = JSON.parse(localStorage.getItem('planner_year_goals')) || [];
-    let suggestions = JSON.parse(localStorage.getItem('planner_suggestions')) || ['Gym Workout', 'Read Book', 'Python Block', 'German Study'];
-    
-    const quotes = [
-        "Your potential is unlocked the moment you decide to map the execution.",
-        "Small hourly wins stack up into massive annual victories.",
-        "Consistency always beats intensity. Show up for your goals today.",
-        "Design your day, protect your focus, block out the noise."
+    let quickSuggestions = JSON.parse(localStorage.getItem('planner_suggestions')) || [
+        "Gym Session", 
+        "Read a book", 
+        "Coding sprint", 
+        "Drink 3L Water", 
+        "Cardio run"
     ];
 
+    // Theme states saved to prevent losing configuration on refresh
+    let currentThemeMode = localStorage.getItem('planner_theme_mode') || 'dark';
+    let activeAccent = localStorage.getItem('planner_accent_color') || '#38bdf8';
+    let activeCardColor = localStorage.getItem('planner_card_color') || '#1e293b';
+    let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity')) || 0.85;
+    let savedBgImage = localStorage.getItem('planner_bg_image') || '';
+
+    // Initialize fields
     document.getElementById('task-date').value = selectedDateStr;
-    if(localStorage.getItem('planner_username')) {
-        document.getElementById('username-display').value = localStorage.getItem('planner_username');
+
+    // AI Motivational quotes arrays
+    const aiQuotes = [
+        "Focus is a muscle. Your daily targets shape your ultimate destination.",
+        "Consistency outperforms sudden inspiration. Execute your scheduled blocks today.",
+        "Your future self is built day by day, hour by hour. Keep the promise.",
+        "Errors are proof that you are actively building. Recalibrate and move forward.",
+        "You are the master architect of your own schedule. Build a productive framework.",
+        "The best way to predict your year is to design your weeks and rule your days.",
+        "Discipline is simply choosing what you want most over what you want right now.",
+        "Small milestones achieved daily compound into monumental years.",
+        "Treat each day as a separate algorithmic code block. Optimize your runtime.",
+        "Productivity isn't about busy work; it's about focused action items.",
+        "The space between who you are and who you want to be is filled with your habits."
+    ];
+
+    // Utility function: Hex code color convertor to allow safe Opacity manipulation
+    function hexToRgb(hex) {
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 30, g: 41, b: 59 };
     }
 
-    function saveUsername() {
-        localStorage.setItem('planner_username', document.getElementById('username-display').value);
-        evaluateGreeting();
-    }
-
-    function evaluateGreeting() {
-        const hrs = new Date().getHours();
-        let greeting = "Good morning,";
-        if(hrs >= 12 && hrs < 17) greeting = "Good afternoon,";
-        if(hrs >= 17 && hrs < 22) greeting = "Good evening,";
-        if(hrs >= 22 || hrs < 5) greeting = "Good night,";
+    // Initialize Greeting & Dynamic Time Detection
+    function loadGreetingAndQuotes() {
+        const hour = new Date().getHours();
+        let greeting = "Welcome back,";
+        if (hour >= 5 && hour < 12) {
+            greeting = "Good morning,";
+        } else if (hour >= 12 && hour < 18) {
+            greeting = "Good afternoon,";
+        } else if (hour >= 18 && hour < 22) {
+            greeting = "Good evening,";
+        } else {
+            greeting = "Good night,";
+        }
         document.getElementById('time-greeting').innerText = greeting;
+
+        // User name
+        const savedName = localStorage.getItem('planner_user_name') || "Planner";
+        document.getElementById('user-name').innerText = savedName;
+
+        generateAIQuote();
     }
 
-    function cycleQuote() {
-        const idx = Math.floor(Math.random() * quotes.length);
-        document.getElementById('quote-display').innerText = quotes[idx];
+    function saveUserName() {
+        const el = document.getElementById('user-name');
+        let val = el.innerText.trim();
+        if(!val) val = "Planner";
+        localStorage.setItem('planner_user_name', val);
+        el.innerText = val;
     }
 
-    function toggleModal(show) {
-        document.getElementById('theme-modal').style.display = show ? 'flex' : 'none';
+    function generateAIQuote() {
+        const randomIndex = Math.floor(Math.random() * aiQuotes.length);
+        document.getElementById('ai-quote').innerText = aiQuotes[randomIndex];
+    }
+
+    // Presets
+    const colorPresets = [
+        '#38bdf8', // Sky Blue
+        '#10b981', // Emerald Green
+        '#8b5cf6', // Indigo Violet
+        '#f43f5e', // Rose Sunset
+        '#f59e0b', // Amber Orange
+        '#ffffff'  // Pure White
+    ];
+
+    const cardPresets = [
+        '#1e293b', // Deep Slate Dark (Default)
+        '#0f172a', // Jet Dark Blue
+        '#18181b', // Matte Dark Charcoal
+        '#2d2438', // Dark Violet Tint
+        '#f8fafc', // Light White Slate
+        '#cbd5e1'  // Light Platinum Gray
+    ];
+
+    function initializeThemeControls() {
+        applyThemeStyles();
+        renderThemeColorChips();
+        renderCardColorChips();
+        // Set slider indicator values
+        document.getElementById('card-opacity-slider').value = Math.round(activeCardOpacity * 100);
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${Math.round((1 - activeCardOpacity) * 100)}%`;
+    }
+
+    function applyThemeStyles() {
+        const root = document.documentElement;
+        if(currentThemeMode === 'dark') {
+            root.style.setProperty('--bg-main', '#0f172a');
+            root.style.setProperty('--text-main', '#f8fafc');
+            root.style.setProperty('--text-muted', '#94a3b8');
+            root.style.setProperty('--border', '#334155');
+            root.style.setProperty('--bg-overlay', 'rgba(15, 23, 42, 0.7)');
+            document.getElementById('mode-btn').innerText = "Switch to Light Theme";
+        } else {
+            root.style.setProperty('--bg-main', '#f1f5f9');
+            root.style.setProperty('--text-main', '#0f172a');
+            root.style.setProperty('--text-muted', '#64748b');
+            root.style.setProperty('--border', '#cbd5e1');
+            root.style.setProperty('--bg-overlay', 'rgba(255, 255, 255, 0.75)');
+            document.getElementById('mode-btn').innerText = "Switch to Dark Theme";
+        }
+
+        root.style.setProperty('--accent', activeAccent);
+        root.style.setProperty('--accent-hover', activeAccent);
+
+        // Apply background card dynamic color mapping (using safe Opacity configuration)
+        const rgb = hexToRgb(activeCardColor);
+        root.style.setProperty('--bg-card', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${activeCardOpacity})`);
+
+        // Background Image configuration
+        if(savedBgImage) {
+            document.body.style.backgroundImage = `url(${savedBgImage})`;
+        } else {
+            document.body.style.backgroundImage = 'none';
+        }
+    }
+
+    function toggleThemeMode() {
+        currentThemeMode = currentThemeMode === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('planner_theme_mode', currentThemeMode);
+        applyThemeStyles();
+    }
+
+    function renderThemeColorChips() {
+        const container = document.getElementById('color-chips-container');
+        container.innerHTML = '';
+        colorPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === activeAccent) chip.classList.add('active');
+            chip.onclick = () => {
+                activeAccent = color;
+                localStorage.setItem('planner_accent_color', color);
+                applyThemeStyles();
+                renderThemeColorChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-accent-color').value = activeAccent;
+    }
+
+    function applyCustomAccent(val) {
+        activeAccent = val;
+        localStorage.setItem('planner_accent_color', val);
+        applyThemeStyles();
+        renderThemeColorChips();
+    }
+
+    // Card Specific Styling Controllers
+    function renderCardColorChips() {
+        const container = document.getElementById('card-chips-container');
+        container.innerHTML = '';
+        cardPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === activeCardColor) chip.classList.add('active');
+            chip.onclick = () => {
+                activeCardColor = color;
+                localStorage.setItem('planner_card_color', color);
+                applyThemeStyles();
+                renderCardColorChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-card-color').value = activeCardColor;
+    }
+
+    function applyCustomCardColor(val) {
+        activeCardColor = val;
+        localStorage.setItem('planner_card_color', val);
+        applyThemeStyles();
+        renderCardColorChips();
+    }
+
+    function applyCardOpacity(val) {
+        // slider val goes from 0 to 100, we map opacity from 0.0 to 1.0
+        activeCardOpacity = parseFloat(val) / 100;
+        localStorage.setItem('planner_card_opacity', activeCardOpacity);
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${100 - val}%`;
+        applyThemeStyles();
+    }
+
+    // Modal Controllers
+    function toggleThemeModal() {
+        const modal = document.getElementById('theme-modal-overlay');
+        modal.classList.toggle('active');
+    }
+
+    function handleOutsideModalClick(event) {
+        if(event.target.id === 'theme-modal-overlay') {
+            toggleThemeModal();
+        }
+    }
+
+    function uploadBackgroundImage(input) {
+        const file = input.files[0];
+        if(!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            savedBgImage = e.target.result;
+            try {
+                localStorage.setItem('planner_bg_image', savedBgImage);
+                applyThemeStyles();
+            } catch(error) {
+                // Customized modal message instead of raw alerts
+                const msg = document.createElement('div');
+                msg.style = "position: fixed; top: 20px; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; z-index: 9999;";
+                msg.innerText = "This image is too large! Try a smaller image under 2MB.";
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 4000);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeBackgroundImage() {
+        savedBgImage = '';
+        localStorage.removeItem('planner_bg_image');
+        applyThemeStyles();
+    }
+
+    // Quick Suggestion Utilities
+    function renderQuickSuggestions() {
+        const container = document.getElementById('suggestion-list');
+        container.innerHTML = '';
+        
+        if (quickSuggestions.length === 0) {
+            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">No custom suggestions added.</span>`;
+            return;
+        }
+
+        quickSuggestions.forEach((sug, idx) => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            // Clicking item auto-populates the action item text input
+            item.setAttribute('onclick', `useSuggestionTitle('${sug.replace(/'/g, "\\'")}')`);
+            item.innerHTML = `
+                <span>${sug}</span>
+                <button type="button" class="suggestion-btn-delete" onclick="deleteQuickSuggestion(event, ${idx})">✕</button>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function useSuggestionTitle(title) {
+        const titleInput = document.getElementById('task-title');
+        titleInput.value = title;
+        // Simple pop visual feedback on input
+        titleInput.focus();
+        titleInput.style.borderColor = "var(--accent)";
+        setTimeout(() => { titleInput.style.borderColor = ""; }, 500);
+    }
+
+    function addQuickSuggestion() {
+        const input = document.getElementById('suggestion-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        quickSuggestions.push(text);
+        localStorage.setItem('planner_suggestions', JSON.stringify(quickSuggestions));
+        input.value = '';
+        renderQuickSuggestions();
+    }
+
+    function deleteQuickSuggestion(event, index) {
+        event.stopPropagation(); // Stop clicking from autofilling the form
+        quickSuggestions.splice(index, 1);
+        localStorage.setItem('planner_suggestions', JSON.stringify(quickSuggestions));
+        renderQuickSuggestions();
+    }
+
+    // Date formatting helper
+    function formatDisplayDate(dateObj) {
+        return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function updateHeaderDate() {
+        document.getElementById('current-date-display').innerText = formatDisplayDate(new Date());
     }
 
     function switchView(viewName) {
         document.querySelectorAll('.planner-view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        
         document.getElementById(`${viewName}-view`).classList.add('active');
-        event.currentTarget.classList.add('active');
+        // Find click origin button manually for stability
+        const btns = Array.from(document.querySelectorAll('.view-btn'));
+        const activeBtn = btns.find(b => b.innerText.toLowerCase().includes(viewName));
+        if (activeBtn) activeBtn.classList.add('active');
+
         if(viewName === 'month') renderCalendarMatrix();
         if(viewName === 'day') renderDayTasks();
         if(viewName === 'year') renderYearGoals();
-    }
-
-    function addCustomSuggestion() {
-        const input = document.getElementById('sug-input');
-        const val = input.value.trim();
-        if(!val) return;
-        suggestions.push(val);
-        localStorage.setItem('planner_suggestions', JSON.stringify(suggestions));
-        input.value = '';
-        renderSuggestions();
-    }
-
-    function renderSuggestions() {
-        const vault = document.getElementById('suggestion-chips-vault');
-        vault.innerHTML = '';
-        suggestions.forEach(s => {
-            const chip = document.createElement('span');
-            chip.className = 'sug-chip';
-            chip.innerText = s;
-            chip.onclick = () => { document.getElementById('task-title').value = s; };
-            vault.appendChild(chip);
-        });
     }
 
     function saveNewTask() {
@@ -548,9 +1113,17 @@
         const repeat = document.getElementById('task-repeat').value;
         const count = parseInt(document.getElementById('task-repeat-count').value) || 1;
 
-        if (!title || !dateBase) return alert('Provide title and date.');
+        if (!title || !dateBase) {
+            // Toast notification instead of alert
+            const notification = document.createElement('div');
+            notification.style = "position: fixed; top: 20px; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; z-index: 9999;";
+            notification.innerText = "Please provide a title and target start date.";
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+            return;
+        }
 
-        let currentDate = new Date(dateBase + 'T00:00:00');
+        let currentDate = new Date(dateBase);
 
         for (let i = 0; i < count; i++) {
             const dateStr = currentDate.toISOString().split('T')[0];
@@ -561,29 +1134,32 @@
                 duration,
                 repeatType: repeat,
                 instance: i + 1,
-                completed: false
+                completed: false // Added checklist logical tracker
             });
-            if (repeat === 'daily') currentDate.setDate(currentDate.getDate() + 1);
-            else if (repeat === 'weekly') currentDate.setDate(currentDate.getDate() + 7);
-            else break;
+
+            if (repeat === 'daily') {
+                currentDate.setDate(currentDate.getDate() + 1);
+            } else if (repeat === 'weekly') {
+                currentDate.setDate(currentDate.getDate() + 7);
+            } else {
+                break; // One-time structural task
+            }
         }
+
         localStorage.setItem('planner_tasks', JSON.stringify(tasks));
         document.getElementById('task-title').value = '';
         renderDayTasks();
         renderCalendarMatrix();
     }
 
-    function toggleTaskCheck(id) {
-        const target = tasks.find(t => t.id === id);
-        if(target) {
-            target.completed = !target.completed;
-            localStorage.setItem('planner_tasks', JSON.stringify(tasks));
-            renderDayTasks();
-        }
-    }
-
-    function deleteTask(id) {
-        tasks = tasks.filter(t => t.id !== id);
+    // Checklist completion toggler logic
+    function toggleTaskCompletion(id) {
+        tasks = tasks.map(t => {
+            if (t.id === id) {
+                return { ...t, completed: !t.completed };
+            }
+            return t;
+        });
         localStorage.setItem('planner_tasks', JSON.stringify(tasks));
         renderDayTasks();
         renderCalendarMatrix();
@@ -592,23 +1168,31 @@
     function renderDayTasks() {
         const listContainer = document.getElementById('day-tasks-list');
         listContainer.innerHTML = '';
+        
         const dayTitleDate = new Date(selectedDateStr + 'T00:00:00');
         document.getElementById('day-view-title').innerText = `Schedule for ${dayTitleDate.toLocaleDateString('en-US', {month:'long', day:'numeric'})}`;
 
         const filtered = tasks.filter(t => t.date === selectedDateStr);
+
         if(filtered.length === 0) {
-            listContainer.innerHTML = `<li style="color:var(--text-muted); font-style:italic;">No activities plotted.</li>`;
+            listContainer.innerHTML = `<li style="color: var(--text-muted); font-style: italic;">No activities plotted for this day. Ready for design inputs.</li>`;
             return;
         }
 
         filtered.forEach(t => {
             const li = document.createElement('li');
             li.className = 'item-row';
+            if (t.completed) {
+                li.classList.add('completed-task');
+            }
             li.innerHTML = `
                 <div class="item-left">
-                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskCheck('${t.id}')">
-                    <div class="item-text-group">
-                        <span class="item-title ${t.completed ? 'completed' : ''}">${t.title}</span>
+                    <label class="checkbox-container">
+                        <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTaskCompletion('${t.id}')">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-content">
+                        <span class="item-title">${t.title}</span>
                         <span class="item-meta">⏱️ ${t.duration} hrs ${t.repeatType !== 'none' ? `| Inst. #${t.instance}` : ''}</span>
                     </div>
                 </div>
@@ -618,49 +1202,81 @@
         });
     }
 
+    function deleteTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+        renderDayTasks();
+        renderCalendarMatrix();
+    }
+
     function renderCalendarMatrix() {
         const container = document.getElementById('calendar-matrix-container');
         container.innerHTML = '';
+
         const now = new Date(selectedDateStr + 'T00:00:00');
         const year = now.getFullYear();
         const month = now.getMonth();
 
+        document.getElementById('month-view-title').innerText = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         daysOfWeek.forEach(d => {
-            const h = document.createElement('div'); h.className = 'cal-header'; h.innerText = d; container.appendChild(h);
+            const h = document.createElement('div');
+            h.className = 'cal-header';
+            h.innerText = d;
+            container.appendChild(h);
         });
 
         const firstDayIdx = new Date(year, month, 1).getDay();
         const totalDays = new Date(year, month + 1, 0).getDate();
 
-        for (let i = 0; i < firstDayIdx; i++) container.appendChild(document.createElement('div'));
+        for (let i = 0; i < firstDayIdx; i++) {
+            container.appendChild(document.createElement('div'));
+        }
 
         const todayStr = new Date().toISOString().split('T')[0];
 
         for (let day = 1; day <= totalDays; day++) {
-            const loopDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const currentLoopDate = new Date(year, month, day);
+            const loopDateStr = currentLoopDate.toISOString().split('T')[0];
+
             const dayDiv = document.createElement('div');
             dayDiv.className = 'cal-day';
             if (loopDateStr === todayStr) dayDiv.classList.add('today');
             if (loopDateStr === selectedDateStr) dayDiv.classList.add('selected');
+
             dayDiv.innerHTML = `<span>${day}</span>`;
 
-            if (tasks.some(t => t.date === loopDateStr)) {
-                const dot = document.createElement('div'); dot.className = 'dot-indicator'; dayDiv.appendChild(dot);
+            const dayTasks = tasks.filter(t => t.date === loopDateStr);
+            const hasTasks = dayTasks.length > 0;
+            const allCompleted = hasTasks && dayTasks.every(t => t.completed);
+
+            if (hasTasks) {
+                const dot = document.createElement('div');
+                dot.className = 'dot-indicator';
+                if(allCompleted) {
+                    dot.style.backgroundColor = 'var(--text-muted)';
+                    dot.style.opacity = '0.4';
+                }
+                dayDiv.appendChild(dot);
             }
+
             dayDiv.onclick = () => {
                 selectedDateStr = loopDateStr;
                 document.getElementById('task-date').value = selectedDateStr;
                 switchView('day');
             };
+
             container.appendChild(dayDiv);
         }
     }
 
     function addYearGoal() {
         const input = document.getElementById('year-goal-input');
-        if(!input.value.trim()) return;
-        yearGoals.push({ id: Date.now().toString(), text: input.value.trim() });
+        const val = input.value.trim();
+        if(!val) return;
+
+        yearGoals.push({ id: Date.now().toString(), text: val });
         localStorage.setItem('planner_year_goals', JSON.stringify(yearGoals));
         input.value = '';
         renderYearGoals();
@@ -676,71 +1292,27 @@
         const list = document.getElementById('year-goals-list');
         list.innerHTML = '';
         if(yearGoals.length === 0) {
-            list.innerHTML = `<li style="color:var(--text-muted); font-style:italic;">No targets logged.</li>`;
+            list.innerHTML = `<li style="color: var(--text-muted); font-style: italic;">No macro milestones logged yet.</li>`;
             return;
         }
         yearGoals.forEach(g => {
             const li = document.createElement('li');
             li.className = 'item-row';
-            li.innerHTML = `<span>🎯 ${g.text}</span><button class="delete-btn" onclick="deleteYearGoal('${g.id}')">✕</button>`;
+            li.innerHTML = `
+                <span class="item-title">🎯 ${g.text}</span>
+                <button class="delete-btn" onclick="deleteYearGoal('${g.id}')">✕</button>
+            `;
             list.appendChild(li);
         });
     }
 
-    function applyCustomThemes() {
-        const bg = document.getElementById('cfg-bg').value;
-        const accent = document.getElementById('cfg-accent').value;
-        const cardBase = document.getElementById('cfg-card').value;
-        const opacity = document.getElementById('cfg-opacity').value;
-
-        document.getElementById('opacity-val').innerText = opacity;
-
-        const r = document.documentElement.style;
-        r.setProperty('--bg-main', bg);
-        r.setProperty('--accent', accent);
-        
-        // Convert hex to rgb for opacity merging
-        let c = cardBase.replace('#','');
-        let r_val = parseInt(c.substring(0,2), 16);
-        let g_val = parseInt(c.substring(2,4), 16);
-        let b_val = parseInt(c.substring(4,6), 16);
-        
-        r.setProperty('--bg-card', `rgba(${r_val}, ${g_val}, ${b_val}, ${opacity / 100})`);
-        
-        localStorage.setItem('theme_config', JSON.stringify({bg, accent, cardBase, opacity}));
-    }
-
-    function uploadWallpaper() {
-        const file = document.getElementById('cfg-wallpaper').files[0];
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            document.body.style.backgroundImage = `url(${reader.result})`;
-            document.getElementById('custom-bg-blur').style.display = 'block';
-            localStorage.setItem('theme_wallpaper', reader.result);
-        }
-        if(file) reader.readAsDataURL(file);
-    }
-
-    function loadSavedTheme() {
-        const cfg = JSON.parse(localStorage.getItem('theme_config'));
-        if(cfg) {
-            document.getElementById('cfg-bg').value = cfg.bg;
-            document.getElementById('cfg-accent').value = cfg.accent;
-            document.getElementById('cfg-card').value = cfg.cardBase;
-            document.getElementById('cfg-opacity').value = cfg.opacity;
-            applyCustomThemes();
-        }
-        const wp = localStorage.getItem('theme_wallpaper');
-        if(wp) {
-            document.body.style.backgroundImage = `url(${wp})`;
-            document.getElementById('custom-bg-blur').style.display = 'block';
-        }
-    }
-
-    evaluateGreeting();
-    renderSuggestions();
+    // Initial load configurations
+    updateHeaderDate();
+    loadGreetingAndQuotes();
+    initializeThemeControls();
     renderDayTasks();
-    loadSavedTheme();
+    renderQuickSuggestions();
 </script>
+
 </body>
 </html>
