@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-main: #0f172a;
-            --bg-card: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.85); /* Default with initial transparency */
             --accent: #38bdf8;
             --accent-hover: #0ea5e9;
             --text-main: #f8fafc;
@@ -68,6 +68,7 @@
             flex-direction: column;
             gap: 10px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            backdrop-filter: blur(8px);
         }
 
         .greeting-title {
@@ -140,18 +141,19 @@
             cursor: pointer;
             font-weight: 500;
             transition: all 0.2s;
+            backdrop-filter: blur(8px);
         }
 
         .view-btn.active, .view-btn:hover {
             background: var(--accent);
-            color: #0f172a; /* Force dark text for visibility on light themes */
+            color: #0f172a; /* Force dark text for visibility */
             border-color: var(--accent);
             font-weight: 600;
         }
 
         .grid-layout {
             display: grid;
-            grid-template-columns: 1fr 320px;
+            grid-template-columns: 1fr 340px;
             gap: 25px;
         }
 
@@ -166,6 +168,7 @@
             padding: 20px;
             min-height: 400px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            backdrop-filter: blur(8px);
         }
 
         .sidebar-card {
@@ -177,6 +180,7 @@
             flex-direction: column;
             gap: 20px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            backdrop-filter: blur(8px);
         }
 
         .planner-view { display: none; }
@@ -217,7 +221,7 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 5px;
-            transition: filter 0.2s;
+            transition: filter 0.2s, background-color 0.2s;
         }
         .submit-btn:hover { filter: brightness(1.1); }
 
@@ -358,27 +362,90 @@
             margin-bottom: 15px;
         }
 
-        .theme-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 10px;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        }
-        .theme-title {
-            font-size: 1rem;
-            font-weight: bold;
-            margin-bottom: 12px;
+        /* Theme Settings Modal Styles */
+        .theme-btn-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            font-size: 1.8rem;
+            z-index: 999;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: pulse-heart 2.5s infinite;
         }
-        .theme-options {
+        .theme-btn-fab:hover {
+            transform: scale(1.15) rotate(10deg);
+        }
+
+        @keyframes pulse-heart {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .theme-modal-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            padding: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .theme-modal-card {
+            transform: translateY(0);
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .close-modal-btn:hover {
+            color: var(--text-main);
+        }
+
         .color-chips {
             display: flex;
             gap: 8px;
@@ -386,35 +453,52 @@
             margin-top: 4px;
         }
         .color-chip {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid transparent;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .color-chip.active {
-            border-color: var(--text-main);
-            transform: scale(1.1);
+            border-color: #ffffff;
+            transform: scale(1.15);
         }
+
+        .opacity-slider-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .opacity-slider-wrapper input {
+            flex: 1;
+            height: 6px;
+            background: #334155;
+            outline: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
         .file-upload-btn {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.25);
             border: 1px dashed var(--border);
-            padding: 8px;
+            padding: 10px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             text-align: center;
             cursor: pointer;
             color: var(--text-muted);
+            display: block;
         }
         .file-upload-btn:hover {
             border-color: var(--accent);
             color: var(--text-main);
         }
+
         .toggle-mode-btn {
             width: 100%;
-            padding: 8px;
-            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            background: rgba(0,0,0,0.25);
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text-main);
@@ -424,6 +508,83 @@
         }
         .toggle-mode-btn:hover {
             border-color: var(--accent);
+        }
+
+        /* Quick Suggestion Box Styles */
+        .suggestions-section {
+            background: rgba(0,0,0,0.15);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .suggestions-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 4px;
+        }
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggestion-item:hover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent);
+        }
+        .suggestion-btn-delete {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px 5px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+        .suggestion-btn-delete:hover {
+            opacity: 1;
+        }
+        .suggestion-add-form {
+            display: flex;
+            gap: 6px;
+        }
+        .suggestion-input {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+        .suggestion-add-btn {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -497,6 +658,21 @@
             <aside class="sidebar-card">
                 <h3>Task & Focus Engine</h3>
                 
+                <!-- Quick Suggestion Box Inside Sidebar Engine -->
+                <div class="suggestions-section">
+                    <div class="suggestions-title">
+                        <span>Quick Templates ⭐</span>
+                    </div>
+                    <div id="suggestion-list" class="suggestion-list">
+                        <!-- Templates load here -->
+                    </div>
+                    <div class="suggestion-add-form">
+                        <input type="text" id="suggestion-input" class="suggestion-input" placeholder="e.g. Work out, Read book...">
+                        <button type="button" class="suggestion-add-btn" onclick="addQuickSuggestion()">Add</button>
+                    </div>
+                </div>
+
+                <!-- Main Task Deployer Form -->
                 <div class="form-group">
                     <label for="task-title">Action Item Title</label>
                     <input type="text" id="task-title" placeholder="Workout, Coding block, Study session...">
@@ -530,30 +706,68 @@
 
                 <button class="submit-btn" onclick="saveNewTask()">Deploy to Schedule</button>
             </aside>
+        </div>
+    </div>
+</div>
 
-            <!-- THEME SWITCHER PANEL -->
-            <div class="theme-card">
-                <div class="theme-title">Theme Customizer 🎨</div>
-                <div class="theme-options">
-                    <button class="toggle-mode-btn" onclick="toggleThemeMode()" id="mode-btn">Switch to Light Theme</button>
-                    
-                    <div class="form-group">
-                        <label>Accent Highlights</label>
-                        <div class="color-chips" id="color-chips-container"></div>
-                    </div>
+<!-- FLOATING PORTAL TRIGGER (HEART BUTTON) -->
+<button class="theme-btn-fab" onclick="toggleThemeModal()" title="Customize Themes & Colors">❤️</button>
 
-                    <div class="form-group">
-                        <label>Custom Color Choice</label>
-                        <input type="color" id="custom-accent-color" oninput="applyCustomAccent(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
-                    </div>
+<!-- THEME OVERLAY & PANEL MODAL -->
+<div class="modal-overlay" id="theme-modal-overlay" onclick="handleOutsideModalClick(event)">
+    <div class="theme-modal-card">
+        <button class="close-modal-btn" onclick="toggleThemeModal()">✕</button>
+        <h2 style="font-size: 1.3rem; font-weight: bold; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            Theme Customizer 🎨
+        </h2>
+        
+        <div class="theme-options" style="display: flex; flex-direction: column; gap: 20px;">
+            <button class="toggle-mode-btn" onclick="toggleThemeMode()" id="mode-btn">Switch to Light Theme</button>
+            
+            <hr style="border: 0; border-top: 1px solid var(--border);">
 
-                    <div class="form-group">
-                        <label>Wallpaper Background</label>
-                        <label class="file-upload-btn" for="bg-upload">Upload Background Image 🖼️</label>
-                        <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
-                        <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
-                    </div>
+            <!-- ACCENT HIGHLIGHT CONTROL -->
+            <div class="form-group">
+                <label>Highlight Accent Colors</label>
+                <div class="color-chips" id="color-chips-container"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Custom Accent Color Choice</label>
+                <input type="color" id="custom-accent-color" oninput="applyCustomAccent(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border);">
+
+            <!-- CARD BACKGROUND COLOR CONTROL -->
+            <div class="form-group">
+                <label>Tab / Card Background Colors</label>
+                <div class="color-chips" id="card-chips-container"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Custom Card Color Choice</label>
+                <input type="color" id="custom-card-color" oninput="applyCustomCardColor(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+            </div>
+
+            <!-- OPACITY SLIDER -->
+            <div class="form-group">
+                <label id="opacity-slider-label">Card Transparency: 85%</label>
+                <div class="opacity-slider-wrapper">
+                    <span>0%</span>
+                    <input type="range" id="card-opacity-slider" min="0" max="100" value="85" oninput="applyCardOpacity(this.value)">
+                    <span>100%</span>
                 </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border);">
+
+            <!-- WALLPAPER BACKGROUND CONTROL -->
+            <div class="form-group">
+                <label>Wallpaper Background</label>
+                <label class="file-upload-btn" for="bg-upload">Upload Background Image 🖼️</label>
+                <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
+                <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
             </div>
         </div>
     </div>
@@ -564,10 +778,19 @@
     let selectedDateStr = new Date().toISOString().split('T')[0];
     let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
     let yearGoals = JSON.parse(localStorage.getItem('planner_year_goals')) || [];
+    let quickSuggestions = JSON.parse(localStorage.getItem('planner_suggestions')) || [
+        "Gym Session", 
+        "Read a book", 
+        "Coding sprint", 
+        "Drink 3L Water", 
+        "Cardio run"
+    ];
 
     // Theme states saved to prevent losing configuration on refresh
     let currentThemeMode = localStorage.getItem('planner_theme_mode') || 'dark';
     let activeAccent = localStorage.getItem('planner_accent_color') || '#38bdf8';
+    let activeCardColor = localStorage.getItem('planner_card_color') || '#1e293b';
+    let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity')) || 0.85;
     let savedBgImage = localStorage.getItem('planner_bg_image') || '';
 
     // Initialize fields
@@ -587,6 +810,20 @@
         "Productivity isn't about busy work; it's about focused action items.",
         "The space between who you are and who you want to be is filled with your habits."
     ];
+
+    // Utility function: Hex code color convertor to allow safe Opacity manipulation
+    function hexToRgb(hex) {
+        var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+            return r + r + g + g + b + b;
+        });
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 30, g: 41, b: 59 };
+    }
 
     // Initialize Greeting & Dynamic Time Detection
     function loadGreetingAndQuotes() {
@@ -623,9 +860,9 @@
         document.getElementById('ai-quote').innerText = aiQuotes[randomIndex];
     }
 
-    // Theme Switcher & System Color Matrix configuration
+    // Presets
     const colorPresets = [
-        '#38bdf8', // Sky Blue (Original)
+        '#38bdf8', // Sky Blue
         '#10b981', // Emerald Green
         '#8b5cf6', // Indigo Violet
         '#f43f5e', // Rose Sunset
@@ -633,16 +870,28 @@
         '#ffffff'  // Pure White
     ];
 
+    const cardPresets = [
+        '#1e293b', // Deep Slate Dark (Default)
+        '#0f172a', // Jet Dark Blue
+        '#18181b', // Matte Dark Charcoal
+        '#2d2438', // Dark Violet Tint
+        '#f8fafc', // Light White Slate
+        '#cbd5e1'  // Light Platinum Gray
+    ];
+
     function initializeThemeControls() {
         applyThemeStyles();
         renderThemeColorChips();
+        renderCardColorChips();
+        // Set slider indicator values
+        document.getElementById('card-opacity-slider').value = Math.round(activeCardOpacity * 100);
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${Math.round((1 - activeCardOpacity) * 100)}%`;
     }
 
     function applyThemeStyles() {
         const root = document.documentElement;
         if(currentThemeMode === 'dark') {
             root.style.setProperty('--bg-main', '#0f172a');
-            root.style.setProperty('--bg-card', '#1e293b');
             root.style.setProperty('--text-main', '#f8fafc');
             root.style.setProperty('--text-muted', '#94a3b8');
             root.style.setProperty('--border', '#334155');
@@ -650,7 +899,6 @@
             document.getElementById('mode-btn').innerText = "Switch to Light Theme";
         } else {
             root.style.setProperty('--bg-main', '#f1f5f9');
-            root.style.setProperty('--bg-card', '#ffffff');
             root.style.setProperty('--text-main', '#0f172a');
             root.style.setProperty('--text-muted', '#64748b');
             root.style.setProperty('--border', '#cbd5e1');
@@ -659,8 +907,11 @@
         }
 
         root.style.setProperty('--accent', activeAccent);
-        // Calculate hover colour brightness filter
         root.style.setProperty('--accent-hover', activeAccent);
+
+        // Apply background card dynamic color mapping (using safe Opacity configuration)
+        const rgb = hexToRgb(activeCardColor);
+        root.style.setProperty('--bg-card', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${activeCardOpacity})`);
 
         // Background Image configuration
         if(savedBgImage) {
@@ -702,6 +953,53 @@
         renderThemeColorChips();
     }
 
+    // Card Specific Styling Controllers
+    function renderCardColorChips() {
+        const container = document.getElementById('card-chips-container');
+        container.innerHTML = '';
+        cardPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === activeCardColor) chip.classList.add('active');
+            chip.onclick = () => {
+                activeCardColor = color;
+                localStorage.setItem('planner_card_color', color);
+                applyThemeStyles();
+                renderCardColorChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-card-color').value = activeCardColor;
+    }
+
+    function applyCustomCardColor(val) {
+        activeCardColor = val;
+        localStorage.setItem('planner_card_color', val);
+        applyThemeStyles();
+        renderCardColorChips();
+    }
+
+    function applyCardOpacity(val) {
+        // slider val goes from 0 to 100, we map opacity from 0.0 to 1.0
+        activeCardOpacity = parseFloat(val) / 100;
+        localStorage.setItem('planner_card_opacity', activeCardOpacity);
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${100 - val}%`;
+        applyThemeStyles();
+    }
+
+    // Modal Controllers
+    function toggleThemeModal() {
+        const modal = document.getElementById('theme-modal-overlay');
+        modal.classList.toggle('active');
+    }
+
+    function handleOutsideModalClick(event) {
+        if(event.target.id === 'theme-modal-overlay') {
+            toggleThemeModal();
+        }
+    }
+
     function uploadBackgroundImage(input) {
         const file = input.files[0];
         if(!file) return;
@@ -713,7 +1011,12 @@
                 localStorage.setItem('planner_bg_image', savedBgImage);
                 applyThemeStyles();
             } catch(error) {
-                alert("This image is too large! Please choose a smaller image (under 3MB) to prevent storage limits.");
+                // Customized modal message instead of raw alerts
+                const msg = document.createElement('div');
+                msg.style = "position: fixed; top: 20px; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; z-index: 9999;";
+                msg.innerText = "This image is too large! Try a smaller image under 2MB.";
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 4000);
             }
         };
         reader.readAsDataURL(file);
@@ -725,6 +1028,57 @@
         applyThemeStyles();
     }
 
+    // Quick Suggestion Utilities
+    function renderQuickSuggestions() {
+        const container = document.getElementById('suggestion-list');
+        container.innerHTML = '';
+        
+        if (quickSuggestions.length === 0) {
+            container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.8rem; font-style: italic;">No custom suggestions added.</span>`;
+            return;
+        }
+
+        quickSuggestions.forEach((sug, idx) => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            // Clicking item auto-populates the action item text input
+            item.setAttribute('onclick', `useSuggestionTitle('${sug.replace(/'/g, "\\'")}')`);
+            item.innerHTML = `
+                <span>${sug}</span>
+                <button type="button" class="suggestion-btn-delete" onclick="deleteQuickSuggestion(event, ${idx})">✕</button>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function useSuggestionTitle(title) {
+        const titleInput = document.getElementById('task-title');
+        titleInput.value = title;
+        // Simple pop visual feedback on input
+        titleInput.focus();
+        titleInput.style.borderColor = "var(--accent)";
+        setTimeout(() => { titleInput.style.borderColor = ""; }, 500);
+    }
+
+    function addQuickSuggestion() {
+        const input = document.getElementById('suggestion-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        quickSuggestions.push(text);
+        localStorage.setItem('planner_suggestions', JSON.stringify(quickSuggestions));
+        input.value = '';
+        renderQuickSuggestions();
+    }
+
+    function deleteQuickSuggestion(event, index) {
+        event.stopPropagation(); // Stop clicking from autofilling the form
+        quickSuggestions.splice(index, 1);
+        localStorage.setItem('planner_suggestions', JSON.stringify(quickSuggestions));
+        renderQuickSuggestions();
+    }
+
+    // Date formatting helper
     function formatDisplayDate(dateObj) {
         return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
     }
@@ -756,7 +1110,12 @@
         const count = parseInt(document.getElementById('task-repeat-count').value) || 1;
 
         if (!title || !dateBase) {
-            alert('Please provide a title and target start date.');
+            // Toast notification instead of alert
+            const notification = document.createElement('div');
+            notification.style = "position: fixed; top: 20px; background: #ef4444; color: white; padding: 12px 24px; border-radius: 6px; z-index: 9999;";
+            notification.innerText = "Please provide a title and target start date.";
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
             return;
         }
 
@@ -948,6 +1307,7 @@
     loadGreetingAndQuotes();
     initializeThemeControls();
     renderDayTasks();
+    renderQuickSuggestions();
 </script>
 </body>
 </html>
