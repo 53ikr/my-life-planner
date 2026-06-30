@@ -18,6 +18,8 @@
             --text-muted: #94a3b8;
             --border: #334155;
             --bg-overlay: rgba(15, 23, 42, 0.4);
+            --font-panel-bg: #1e293b;
+            --font-panel-text: #f8fafc;
         }
 
     * {
@@ -95,7 +97,7 @@
     }
 
     .ai-motivation {
-        font-size: 0.95rem;
+        font-size: 1.2rem;
         color: var(--text-muted);
         font-style: italic;
         border-left: 3px solid var(--accent);
@@ -129,12 +131,14 @@
         color: var(--accent);
         cursor: pointer;
         font-size: 1rem;
-        padding: 3px 8px;
+        padding: 5px 9px;
         border-radius: 6px;
         opacity: 0.8;
         transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
-        -webkit-text-fill-color: var(--accent);
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .greeting-font-btn:hover {
         opacity: 1;
@@ -154,7 +158,7 @@
 
     .font-picker-panel {
         position: fixed;
-        background: #1e293b;
+        background: var(--font-panel-bg);
         border: 1px solid #334155;
         border-radius: 14px;
         padding: 18px;
@@ -172,7 +176,8 @@
     .font-picker-title {
         font-size: 0.8rem;
         font-weight: 700;
-        color: var(--text-muted);
+        color: var(--font-panel-text);
+        opacity: 0.65;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 12px;
@@ -205,7 +210,7 @@
     }
     .font-option-preview {
         font-size: 1.2rem;
-        color: var(--text-main);
+        color: var(--font-panel-text);
         line-height: 1.3;
         white-space: nowrap;
         overflow: hidden;
@@ -213,7 +218,8 @@
     }
     .font-option-label {
         font-size: 0.72rem;
-        color: var(--text-muted);
+        color: var(--font-panel-text);
+        opacity: 0.65;
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -1007,7 +1013,11 @@
             <span id="time-greeting">Welcome back,</span>
             <span class="editable-name" id="user-name" contenteditable="true" onblur="saveUserName()" title="Double click to edit your name">Planner</span>
             <!-- FEATURE 1: Font Picker Button -->
-            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style">⚡</button>
+            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:block;">
+                    <path d="M13 2L3 14h7l-1 8 11-13h-7l1-7z"/>
+                </svg>
+            </button>
         </div>
         <div class="ai-motivation">
             <span id="ai-quote">Initializing motivation matrix...</span>
@@ -1231,6 +1241,30 @@
             <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
             <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
         </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border);">
+
+        <!-- FONT PICKER PANEL BACKGROUND CONTROL -->
+        <div class="form-group">
+            <label>Font Picker Panel Background</label>
+            <div class="color-chips" id="font-panel-bg-chips-container"></div>
+        </div>
+        <div class="form-group">
+            <label>Custom Panel Background Choice</label>
+            <input type="color" id="custom-font-panel-bg" oninput="applyCustomFontPanelBg(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border);">
+
+        <!-- FONT PICKER TEXT COLOR CONTROL -->
+        <div class="form-group">
+            <label>Font Picker Text Color</label>
+            <div class="color-chips" id="font-panel-text-chips-container"></div>
+        </div>
+        <div class="form-group">
+            <label>Custom Panel Text Color Choice</label>
+            <input type="color" id="custom-font-panel-text" oninput="applyCustomFontPanelText(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+        </div>
     </div>
 </div>
 
@@ -1256,6 +1290,8 @@
     let activeCardColor = localStorage.getItem('planner_card_color') || '#1e293b';
     let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity')) || 0.85;
     let savedBgImage = localStorage.getItem('planner_bg_image') || '';
+    let activeFontPanelBg = localStorage.getItem('planner_font_panel_bg') || null;
+    let activeFontPanelText = localStorage.getItem('planner_font_panel_text') || null;
 
     document.getElementById('task-date').value = selectedDateStr;
 
@@ -1322,11 +1358,15 @@
     // Presets
     const colorPresets = ['#38bdf8','#10b981','#8b5cf6','#f43f5e','#f59e0b','#ffffff'];
     const cardPresets = ['#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#cbd5e1'];
+    const fontPanelBgPresets = ['#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#ffffff'];
+    const fontPanelTextPresets = ['#f8fafc','#0f172a','#94a3b8','#38bdf8','#f59e0b','#10b981'];
 
     function initializeThemeControls() {
         applyThemeStyles();
         renderThemeColorChips();
         renderCardColorChips();
+        renderFontPanelBgChips();
+        renderFontPanelTextChips();
         document.getElementById('card-opacity-slider').value = Math.round(activeCardOpacity * 100);
         document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${Math.round((1 - activeCardOpacity) * 100)}%`;
     }
@@ -1352,6 +1392,8 @@
         root.style.setProperty('--accent-hover', activeAccent);
         const rgb = hexToRgb(activeCardColor);
         root.style.setProperty('--bg-card', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${activeCardOpacity})`);
+        root.style.setProperty('--font-panel-bg', activeFontPanelBg || activeCardColor);
+        root.style.setProperty('--font-panel-text', activeFontPanelText || (currentThemeMode === 'dark' ? '#f8fafc' : '#0f172a'));
         if(savedBgImage) {
             document.body.style.backgroundImage = `url(${savedBgImage})`;
         } else {
@@ -1404,6 +1446,7 @@
                 localStorage.setItem('planner_card_color', color);
                 applyThemeStyles();
                 renderCardColorChips();
+                renderFontPanelBgChips();
             };
             container.appendChild(chip);
         });
@@ -1415,6 +1458,61 @@
         localStorage.setItem('planner_card_color', val);
         applyThemeStyles();
         renderCardColorChips();
+        renderFontPanelBgChips();
+    }
+
+    function renderFontPanelBgChips() {
+        const container = document.getElementById('font-panel-bg-chips-container');
+        container.innerHTML = '';
+        const effective = activeFontPanelBg || activeCardColor;
+        fontPanelBgPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === effective) chip.classList.add('active');
+            chip.onclick = () => {
+                activeFontPanelBg = color;
+                localStorage.setItem('planner_font_panel_bg', color);
+                applyThemeStyles();
+                renderFontPanelBgChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-font-panel-bg').value = effective;
+    }
+
+    function applyCustomFontPanelBg(val) {
+        activeFontPanelBg = val;
+        localStorage.setItem('planner_font_panel_bg', val);
+        applyThemeStyles();
+        renderFontPanelBgChips();
+    }
+
+    function renderFontPanelTextChips() {
+        const container = document.getElementById('font-panel-text-chips-container');
+        container.innerHTML = '';
+        const effective = activeFontPanelText || (currentThemeMode === 'dark' ? '#f8fafc' : '#0f172a');
+        fontPanelTextPresets.forEach(color => {
+            const chip = document.createElement('div');
+            chip.className = 'color-chip';
+            chip.style.backgroundColor = color;
+            if(color === effective) chip.classList.add('active');
+            chip.onclick = () => {
+                activeFontPanelText = color;
+                localStorage.setItem('planner_font_panel_text', color);
+                applyThemeStyles();
+                renderFontPanelTextChips();
+            };
+            container.appendChild(chip);
+        });
+        document.getElementById('custom-font-panel-text').value = effective;
+    }
+
+    function applyCustomFontPanelText(val) {
+        activeFontPanelText = val;
+        localStorage.setItem('planner_font_panel_text', val);
+        applyThemeStyles();
+        renderFontPanelTextChips();
     }
 
     function applyCardOpacity(val) {
