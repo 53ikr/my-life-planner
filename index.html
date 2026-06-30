@@ -18,8 +18,6 @@
             --text-muted: #94a3b8;
             --border: #334155;
             --bg-overlay: rgba(15, 23, 42, 0.4);
-            --font-panel-bg: #1e293b;
-            --font-panel-text: #f8fafc;
         }
 
     * {
@@ -131,14 +129,12 @@
         color: var(--accent);
         cursor: pointer;
         font-size: 1rem;
-        padding: 5px 9px;
+        padding: 3px 8px;
         border-radius: 6px;
         opacity: 0.8;
         transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
+        -webkit-text-fill-color: var(--accent);
         line-height: 1;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
     .greeting-font-btn:hover {
         opacity: 1;
@@ -158,7 +154,7 @@
 
     .font-picker-panel {
         position: fixed;
-        background: var(--font-panel-bg);
+        background: #1e293b;
         border: 1px solid #334155;
         border-radius: 14px;
         padding: 18px;
@@ -176,8 +172,7 @@
     .font-picker-title {
         font-size: 0.8rem;
         font-weight: 700;
-        color: var(--font-panel-text);
-        opacity: 0.65;
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 12px;
@@ -210,7 +205,7 @@
     }
     .font-option-preview {
         font-size: 1.2rem;
-        color: var(--font-panel-text);
+        color: var(--text-main);
         line-height: 1.3;
         white-space: nowrap;
         overflow: hidden;
@@ -218,8 +213,7 @@
     }
     .font-option-label {
         font-size: 0.72rem;
-        color: var(--font-panel-text);
-        opacity: 0.65;
+        color: var(--text-muted);
         white-space: nowrap;
         flex-shrink: 0;
     }
@@ -999,256 +993,11 @@
         font-weight: bold;
         cursor: pointer;
     }
-    /* ============================================= */
-    /* FEATURE 4: SIDE PAGE NAV (Schedule / Notes)    */
-    /* ============================================= */
-    .page-view { display: none; }
-    .page-view.active { display: block; }
-
-    .side-page-nav {
-        position: fixed;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        z-index: 1500;
-    }
-    .side-page-btn {
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-left: none;
-        color: var(--text-main);
-        padding: 18px 10px;
-        border-radius: 0 10px 10px 0;
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        box-shadow: 4px 4px 14px rgba(0,0,0,0.25);
-        backdrop-filter: blur(8px);
-        transition: background 0.2s, color 0.2s, transform 0.2s, padding 0.2s;
-    }
-    .side-page-btn:hover {
-        transform: translateX(4px);
-    }
-    .side-page-btn-label {
-        display: inline-block;
-        transform: rotate(180deg);
-    }
-    .side-page-btn.active {
-        background: var(--accent);
-        color: #0f172a;
-        border-color: var(--accent);
-    }
-
-    /* ============================================= */
-    /* NOTES PAGE: copybook layout + toolbox          */
-    /* ============================================= */
-    .notebook-wrapper {
-        max-width: 1180px;
-        margin: 20px auto;
-        padding: 0 30px 60px 70px;
-        display: flex;
-        align-items: flex-start;
-        gap: 24px;
-    }
-    .notebook-page-outer {
-        flex: 1;
-        min-width: 0;
-    }
-    .notebook-page {
-        position: relative;
-        background: #fdfaf3;
-        border-radius: 6px;
-        box-shadow: 0 14px 40px rgba(0,0,0,0.4);
-        padding: 60px 60px 60px 110px;
-        min-height: 88vh;
-        background-image: repeating-linear-gradient(
-            to bottom,
-            transparent 0,
-            transparent 39px,
-            #bcd4ee 40px
-        );
-        background-position: 0 78px;
-        overflow: hidden;
-    }
-    .notebook-margin-line {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 78px;
-        width: 2px;
-        background: #f3a5a5;
-        opacity: 0.75;
-    }
-    .notebook-heart {
-        position: absolute;
-        left: 38px;
-        width: 26px;
-        height: 26px;
-        color: #c7cdd6;
-        z-index: 1;
-    }
-    .notebook-canvas {
-        width: 100%;
-        min-height: 80vh;
-        background: transparent;
-        border: none;
-        outline: none;
-        color: #1f2937;
-        font-size: 1.25rem;
-        line-height: 40px;
-        position: relative;
-        z-index: 1;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    }
-    .notebook-canvas:empty:before {
-        content: attr(data-placeholder);
-        color: #9aa3af;
-        font-style: italic;
-    }
-    .notebook-canvas table {
-        border-collapse: collapse;
-        margin: 10px 0;
-    }
-    .notebook-canvas table td {
-        border: 1px solid #94a3b8;
-        padding: 10px 16px;
-        min-width: 60px;
-        height: 32px;
-    }
-
-    .notebook-ruler {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 34px;
-        background: rgba(56, 189, 248, 0.28);
-        border-top: 2px solid rgba(14, 116, 144, 0.6);
-        border-bottom: 2px solid rgba(14, 116, 144, 0.6);
-        cursor: ns-resize;
-        z-index: 5;
-        display: none;
-    }
-    .notebook-ruler.active { display: block; }
-    .notebook-ruler::after {
-        content: "📏 drag me";
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 0.7rem;
-        color: #0e7490;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-    /* TOOLBOX */
-    .notebook-toolbox {
-        width: 220px;
-        flex-shrink: 0;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        backdrop-filter: blur(8px);
-        position: sticky;
-        top: 20px;
-    }
-    .toolbox-section-title {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 8px;
-    }
-    .toolbox-color-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    .toolbox-color-swatch {
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 2px solid transparent;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-    }
-    .toolbox-color-swatch.active {
-        border-color: var(--text-main);
-        transform: scale(1.15);
-    }
-    .toolbox-size-row {
-        display: flex;
-        gap: 6px;
-    }
-    .toolbox-size-btn {
-        flex: 1;
-        background: rgba(0,0,0,0.2);
-        border: 1px solid var(--border);
-        color: var(--text-main);
-        padding: 6px 0;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    .toolbox-size-btn.active, .toolbox-size-btn:hover {
-        background: var(--accent);
-        color: #0f172a;
-        border-color: var(--accent);
-    }
-    .toolbox-tool-btn {
-        width: 100%;
-        background: rgba(0,0,0,0.2);
-        border: 1px solid var(--border);
-        color: var(--text-main);
-        padding: 9px 10px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.82rem;
-        font-weight: 600;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: background 0.2s, border-color 0.2s;
-    }
-    .toolbox-tool-btn:hover {
-        border-color: var(--accent);
-    }
-    .toolbox-tool-btn.active {
-        background: var(--accent);
-        color: #0f172a;
-        border-color: var(--accent);
-    }
-
-    @media (max-width: 900px) {
-        .notebook-wrapper { flex-direction: column; padding-right: 16px; }
-        .notebook-toolbox { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; }
-    }
-    @media (max-width: 700px) {
-        .notebook-page { padding: 45px 25px 45px 60px; }
-        .notebook-margin-line { left: 42px; }
-        .notebook-heart { left: 14px; width: 20px; height: 20px; }
-    }
-
 </style>
 
 </head>
 <body>
 
-<div id="schedule-page-view" class="page-view active">
 <div class="container" style="position: relative;">
 <!-- STICKER CANVAS LAYER - inside page flow so stickers scroll with content -->
 <div id="sticker-canvas-layer"></div>
@@ -1258,11 +1007,7 @@
             <span id="time-greeting">Welcome back,</span>
             <span class="editable-name" id="user-name" contenteditable="true" onblur="saveUserName()" title="Double click to edit your name">Planner</span>
             <!-- FEATURE 1: Font Picker Button -->
-            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:block;">
-                    <path d="M13 2L3 14h7l-1 8 11-13h-7l1-7z"/>
-                </svg>
-            </button>
+            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style">⚡</button>
         </div>
         <div class="ai-motivation">
             <span id="ai-quote">Initializing motivation matrix...</span>
@@ -1386,63 +1131,6 @@
 </div>
 
 </div>
-</div>
-<!-- end schedule-page-view -->
-
-<!-- NOTES PAGE (notebook style) -->
-<div id="notes-page-view" class="page-view">
-    <div class="notebook-wrapper">
-        <div class="notebook-page-outer">
-            <div class="notebook-page" id="notebook-page">
-                <div class="notebook-margin-line"></div>
-                <svg class="notebook-heart" style="top:20px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.1C.6 8.7 2 5 5.5 5c2 0 3.3 1 4.5 2.5C11.2 6 12.5 5 14.5 5 18 5 19.4 8.7 22 11.9 19.5 16.4 12 21 12 21z"/></svg>
-                <svg class="notebook-heart" style="top:45%;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.1C.6 8.7 2 5 5.5 5c2 0 3.3 1 4.5 2.5C11.2 6 12.5 5 14.5 5 18 5 19.4 8.7 22 11.9 19.5 16.4 12 21 12 21z"/></svg>
-                <svg class="notebook-heart" style="bottom:20px;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.1C.6 8.7 2 5 5.5 5c2 0 3.3 1 4.5 2.5C11.2 6 12.5 5 14.5 5 18 5 19.4 8.7 22 11.9 19.5 16.4 12 21 12 21z"/></svg>
-                <div class="notebook-ruler" id="notebook-ruler"></div>
-                <div id="notebook-canvas" class="notebook-canvas" contenteditable="true" data-placeholder="Start writing..." oninput="saveNotebookContent()"></div>
-            </div>
-        </div>
-
-        <!-- TOOLBOX -->
-        <aside class="notebook-toolbox">
-            <div>
-                <div class="toolbox-section-title">📏 Ruler Guide</div>
-                <button class="toolbox-tool-btn" id="ruler-toggle-btn" onclick="toggleRuler()">Toggle Ruler Line</button>
-            </div>
-
-            <div>
-                <div class="toolbox-section-title">✏️ Pencil Color</div>
-                <div class="toolbox-color-row" id="pencil-color-row"></div>
-            </div>
-
-            <div>
-                <div class="toolbox-section-title">🔤 Word Size</div>
-                <div class="toolbox-size-row" id="pencil-size-row"></div>
-            </div>
-
-            <div>
-                <div class="toolbox-section-title">🗂️ Board</div>
-                <button class="toolbox-tool-btn" onclick="insertBoardTable()">➕ Insert Board / Table</button>
-            </div>
-
-            <div>
-                <div class="toolbox-section-title">☑️ Checklist</div>
-                <button class="toolbox-tool-btn" onclick="insertCheckbox()">➕ Insert Checkbox</button>
-            </div>
-
-            <div>
-                <div class="toolbox-section-title">🗑️ Page</div>
-                <button class="toolbox-tool-btn" style="color:#ef4444;" onclick="clearNotebook()">Clear Page</button>
-            </div>
-        </aside>
-    </div>
-</div>
-
-<!-- SIDE PAGE NAVIGATION (Schedule / Notes) -->
-<div class="side-page-nav">
-    <button class="side-page-btn active" id="side-btn-schedule" onclick="switchPage('schedule')"><span class="side-page-btn-label">Schedule</span></button>
-    <button class="side-page-btn" id="side-btn-notes" onclick="switchPage('notes')"><span class="side-page-btn-label">Notes</span></button>
-</div>
 
 <!-- FONT PICKER PANEL (Feature 1) -->
 <div class="font-picker-overlay" id="font-picker-overlay" onclick="closeFontPicker(event)">
@@ -1543,30 +1231,6 @@
             <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="uploadBackgroundImage(this)">
             <button class="toggle-mode-btn" style="margin-top: 5px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;" onclick="removeBackgroundImage()">Clear Background Image</button>
         </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border);">
-
-        <!-- FONT PICKER PANEL BACKGROUND CONTROL -->
-        <div class="form-group">
-            <label>Font Picker Panel Background</label>
-            <div class="color-chips" id="font-panel-bg-chips-container"></div>
-        </div>
-        <div class="form-group">
-            <label>Custom Panel Background Choice</label>
-            <input type="color" id="custom-font-panel-bg" oninput="applyCustomFontPanelBg(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid var(--border);">
-
-        <!-- FONT PICKER TEXT COLOR CONTROL -->
-        <div class="form-group">
-            <label>Font Picker Text Color</label>
-            <div class="color-chips" id="font-panel-text-chips-container"></div>
-        </div>
-        <div class="form-group">
-            <label>Custom Panel Text Color Choice</label>
-            <input type="color" id="custom-font-panel-text" oninput="applyCustomFontPanelText(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
-        </div>
     </div>
 </div>
 
@@ -1592,8 +1256,6 @@
     let activeCardColor = localStorage.getItem('planner_card_color') || '#1e293b';
     let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity')) || 0.85;
     let savedBgImage = localStorage.getItem('planner_bg_image') || '';
-    let activeFontPanelBg = localStorage.getItem('planner_font_panel_bg') || null;
-    let activeFontPanelText = localStorage.getItem('planner_font_panel_text') || null;
 
     document.getElementById('task-date').value = selectedDateStr;
 
@@ -1660,15 +1322,11 @@
     // Presets
     const colorPresets = ['#38bdf8','#10b981','#8b5cf6','#f43f5e','#f59e0b','#ffffff'];
     const cardPresets = ['#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#cbd5e1'];
-    const fontPanelBgPresets = ['#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#ffffff'];
-    const fontPanelTextPresets = ['#f8fafc','#0f172a','#94a3b8','#38bdf8','#f59e0b','#10b981'];
 
     function initializeThemeControls() {
         applyThemeStyles();
         renderThemeColorChips();
         renderCardColorChips();
-        renderFontPanelBgChips();
-        renderFontPanelTextChips();
         document.getElementById('card-opacity-slider').value = Math.round(activeCardOpacity * 100);
         document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${Math.round((1 - activeCardOpacity) * 100)}%`;
     }
@@ -1694,8 +1352,6 @@
         root.style.setProperty('--accent-hover', activeAccent);
         const rgb = hexToRgb(activeCardColor);
         root.style.setProperty('--bg-card', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${activeCardOpacity})`);
-        root.style.setProperty('--font-panel-bg', activeFontPanelBg || activeCardColor);
-        root.style.setProperty('--font-panel-text', activeFontPanelText || (currentThemeMode === 'dark' ? '#f8fafc' : '#0f172a'));
         if(savedBgImage) {
             document.body.style.backgroundImage = `url(${savedBgImage})`;
         } else {
@@ -1748,7 +1404,6 @@
                 localStorage.setItem('planner_card_color', color);
                 applyThemeStyles();
                 renderCardColorChips();
-                renderFontPanelBgChips();
             };
             container.appendChild(chip);
         });
@@ -1760,61 +1415,6 @@
         localStorage.setItem('planner_card_color', val);
         applyThemeStyles();
         renderCardColorChips();
-        renderFontPanelBgChips();
-    }
-
-    function renderFontPanelBgChips() {
-        const container = document.getElementById('font-panel-bg-chips-container');
-        container.innerHTML = '';
-        const effective = activeFontPanelBg || activeCardColor;
-        fontPanelBgPresets.forEach(color => {
-            const chip = document.createElement('div');
-            chip.className = 'color-chip';
-            chip.style.backgroundColor = color;
-            if(color === effective) chip.classList.add('active');
-            chip.onclick = () => {
-                activeFontPanelBg = color;
-                localStorage.setItem('planner_font_panel_bg', color);
-                applyThemeStyles();
-                renderFontPanelBgChips();
-            };
-            container.appendChild(chip);
-        });
-        document.getElementById('custom-font-panel-bg').value = effective;
-    }
-
-    function applyCustomFontPanelBg(val) {
-        activeFontPanelBg = val;
-        localStorage.setItem('planner_font_panel_bg', val);
-        applyThemeStyles();
-        renderFontPanelBgChips();
-    }
-
-    function renderFontPanelTextChips() {
-        const container = document.getElementById('font-panel-text-chips-container');
-        container.innerHTML = '';
-        const effective = activeFontPanelText || (currentThemeMode === 'dark' ? '#f8fafc' : '#0f172a');
-        fontPanelTextPresets.forEach(color => {
-            const chip = document.createElement('div');
-            chip.className = 'color-chip';
-            chip.style.backgroundColor = color;
-            if(color === effective) chip.classList.add('active');
-            chip.onclick = () => {
-                activeFontPanelText = color;
-                localStorage.setItem('planner_font_panel_text', color);
-                applyThemeStyles();
-                renderFontPanelTextChips();
-            };
-            container.appendChild(chip);
-        });
-        document.getElementById('custom-font-panel-text').value = effective;
-    }
-
-    function applyCustomFontPanelText(val) {
-        activeFontPanelText = val;
-        localStorage.setItem('planner_font_panel_text', val);
-        applyThemeStyles();
-        renderFontPanelTextChips();
     }
 
     function applyCardOpacity(val) {
@@ -2146,8 +1746,6 @@
         const targets = [
             document.getElementById('time-greeting'),
             document.getElementById('user-name'),
-            document.getElementById('side-btn-schedule'),
-            document.getElementById('side-btn-notes'),
         ];
         // Also apply to any static span after user-name (the "Planner" label if separate)
         targets.forEach(el => {
@@ -2727,155 +2325,6 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
     }
 
     // =========================================================
-    // FEATURE 4: SIDE PAGE NAVIGATION (Schedule / Notes)
-    // =========================================================
-    function switchPage(pageName) {
-        document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.side-page-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(`${pageName}-page-view`).classList.add('active');
-        document.getElementById(`side-btn-${pageName}`).classList.add('active');
-        if (pageName === 'notes') loadNotebookContent();
-    }
-
-    function saveNotebookContent() {
-        const content = document.getElementById('notebook-canvas').innerHTML;
-        localStorage.setItem('planner_notebook_content', content);
-    }
-
-    function loadNotebookContent() {
-        const saved = localStorage.getItem('planner_notebook_content') || '';
-        document.getElementById('notebook-canvas').innerHTML = saved;
-    }
-
-    function clearNotebook() {
-        if (!confirm('Clear the whole notes page? This cannot be undone.')) return;
-        document.getElementById('notebook-canvas').innerHTML = '';
-        saveNotebookContent();
-    }
-
-    // ---------------------------------------------------------
-    // RULER GUIDE
-    // ---------------------------------------------------------
-    let rulerActive = false;
-    let rulerDragging = false;
-
-    function toggleRuler() {
-        rulerActive = !rulerActive;
-        const ruler = document.getElementById('notebook-ruler');
-        const btn = document.getElementById('ruler-toggle-btn');
-        if (rulerActive) {
-            ruler.classList.add('active');
-            ruler.style.top = '150px';
-            btn.classList.add('active');
-        } else {
-            ruler.classList.remove('active');
-            btn.classList.remove('active');
-        }
-    }
-
-    const notebookRulerEl = document.getElementById('notebook-ruler');
-    if (notebookRulerEl) {
-        notebookRulerEl.addEventListener('mousedown', (e) => {
-            rulerDragging = true;
-            e.preventDefault();
-        });
-    }
-
-    document.addEventListener('mousemove', (e) => {
-        if (!rulerDragging) return;
-        const page = document.getElementById('notebook-page');
-        const ruler = document.getElementById('notebook-ruler');
-        if (!page || !ruler) return;
-        const rect = page.getBoundingClientRect();
-        let newTop = e.clientY - rect.top - 17;
-        newTop = Math.max(0, Math.min(newTop, page.scrollHeight - 34));
-        ruler.style.top = newTop + 'px';
-    });
-
-    document.addEventListener('mouseup', () => { rulerDragging = false; });
-
-    // ---------------------------------------------------------
-    // PENCIL COLORS & WORD SIZE (applies to selected text)
-    // ---------------------------------------------------------
-    const pencilColors = ['#1f2937', '#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-    const wordSizes = [
-        { label: 'S', size: '3' },
-        { label: 'M', size: '4' },
-        { label: 'L', size: '5' },
-        { label: 'XL', size: '6' }
-    ];
-    let activePencilColor = pencilColors[0];
-    let activeWordSize = '4';
-
-    function renderPencilColors() {
-        const row = document.getElementById('pencil-color-row');
-        row.innerHTML = '';
-        pencilColors.forEach(color => {
-            const sw = document.createElement('div');
-            sw.className = 'toolbox-color-swatch' + (color === activePencilColor ? ' active' : '');
-            sw.style.backgroundColor = color;
-            sw.onclick = () => {
-                activePencilColor = color;
-                document.getElementById('notebook-canvas').focus();
-                document.execCommand('foreColor', false, color);
-                renderPencilColors();
-                saveNotebookContent();
-            };
-            row.appendChild(sw);
-        });
-    }
-
-    function renderWordSizes() {
-        const row = document.getElementById('pencil-size-row');
-        row.innerHTML = '';
-        wordSizes.forEach(ws => {
-            const btn = document.createElement('button');
-            btn.className = 'toolbox-size-btn' + (ws.size === activeWordSize ? ' active' : '');
-            btn.innerText = ws.label;
-            btn.onclick = () => {
-                activeWordSize = ws.size;
-                document.getElementById('notebook-canvas').focus();
-                document.execCommand('fontSize', false, ws.size);
-                renderWordSizes();
-                saveNotebookContent();
-            };
-            row.appendChild(btn);
-        });
-    }
-
-    // ---------------------------------------------------------
-    // BOARD / TABLE INSERT
-    // ---------------------------------------------------------
-    function insertBoardTable() {
-        const canvas = document.getElementById('notebook-canvas');
-        canvas.focus();
-        let rows = parseInt(prompt('How many rows for your board?', '3')) || 3;
-        let cols = parseInt(prompt('How many columns for your board?', '3')) || 3;
-        rows = Math.max(1, Math.min(rows, 12));
-        cols = Math.max(1, Math.min(cols, 8));
-        let html = '<table>';
-        for (let r = 0; r < rows; r++) {
-            html += '<tr>';
-            for (let c = 0; c < cols; c++) html += '<td></td>';
-            html += '</tr>';
-        }
-        html += '</table><br>';
-        document.execCommand('insertHTML', false, html);
-        saveNotebookContent();
-    }
-
-    // ---------------------------------------------------------
-    // CHECKBOX INSERT
-    // ---------------------------------------------------------
-    function insertCheckbox() {
-        const canvas = document.getElementById('notebook-canvas');
-        canvas.focus();
-        const html = '<label contenteditable="false" style="display:inline-flex; align-items:center; gap:6px; margin-right:10px; user-select:none;"><input type="checkbox" onclick="saveNotebookContent()" style="width:16px; height:16px; cursor:pointer;"><span contenteditable="true" style="min-width:60px; display:inline-block;">&nbsp;</span></label>';
-        document.execCommand('insertHTML', false, html);
-        saveNotebookContent();
-    }
-
-    // =========================================================
     // INITIAL LOAD
     // =========================================================
     updateHeaderDate();
@@ -2884,9 +2333,6 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
     renderDayTasks();
     renderQuickSuggestions();
     loadPlacedStickers();
-    loadNotebookContent();
-    renderPencilColors();
-    renderWordSizes();
 </script>
 
 </body>
