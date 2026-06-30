@@ -1035,6 +1035,10 @@
     .side-page-btn:hover {
         transform: translateX(4px);
     }
+    .side-page-btn-label {
+        display: inline-block;
+        transform: rotate(180deg);
+    }
     .side-page-btn.active {
         background: var(--accent);
         color: #0f172a;
@@ -1436,8 +1440,8 @@
 
 <!-- SIDE PAGE NAVIGATION (Schedule / Notes) -->
 <div class="side-page-nav">
-    <button class="side-page-btn active" id="side-btn-schedule" onclick="switchPage('schedule')">Schedule</button>
-    <button class="side-page-btn" id="side-btn-notes" onclick="switchPage('notes')">Notes</button>
+    <button class="side-page-btn active" id="side-btn-schedule" onclick="switchPage('schedule')"><span class="side-page-btn-label">Schedule</span></button>
+    <button class="side-page-btn" id="side-btn-notes" onclick="switchPage('notes')"><span class="side-page-btn-label">Notes</span></button>
 </div>
 
 <!-- FONT PICKER PANEL (Feature 1) -->
