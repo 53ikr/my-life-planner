@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +13,7 @@
             --bg-card: rgba(30, 41, 59, 0.85); /* Default with initial transparency */
             --accent: #38bdf8;
             --accent-hover: #0ea5e9;
+            --accent-rgb: 56, 189, 248;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
@@ -115,9 +115,17 @@
         font-size: 1.1rem;
         opacity: 0.7;
         transition: opacity 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .refresh-quote-btn:hover {
         opacity: 1;
+    }
+    .refresh-quote-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--accent);
     }
 
     /* ===================== */
@@ -135,11 +143,19 @@
         transition: opacity 0.2s, border-color 0.2s, transform 0.2s;
         -webkit-text-fill-color: var(--accent);
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .greeting-font-btn:hover {
         opacity: 1;
         border-color: var(--accent);
         transform: scale(1.1);
+    }
+    .greeting-font-btn svg {
+        width: 16px;
+        height: 16px;
+        fill: var(--accent);
     }
 
     .font-picker-overlay {
@@ -154,8 +170,8 @@
 
     .font-picker-panel {
         position: fixed;
-        background: #1e293b;
-        border: 1px solid #334155;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
         border-radius: 14px;
         padding: 18px;
         width: 360px;
@@ -164,6 +180,7 @@
         box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         z-index: 2001;
         animation: fontPanelIn 0.2s ease;
+        backdrop-filter: blur(8px);
     }
     @keyframes fontPanelIn {
         from { opacity: 0; transform: translateY(-8px) scale(0.97); }
@@ -261,10 +278,18 @@
         opacity: 0.7;
         transition: opacity 0.2s, transform 0.4s;
         -webkit-text-fill-color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .ai-feedback-refresh-btn:hover { opacity: 1; }
     .ai-feedback-refresh-btn.spinning {
         animation: spin 0.8s linear infinite;
+    }
+    .ai-feedback-refresh-btn svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--accent);
     }
     @keyframes spin {
         from { transform: rotate(0deg); }
@@ -795,9 +820,9 @@
 
     /* Single shared pulse used by BOTH FABs — same duration so they beat in sync */
     @keyframes fab-pulse {
-        0%   { box-shadow: 0 0 0 0   rgba(56, 189, 248, 0.45); }
-        70%  { box-shadow: 0 0 0 15px rgba(56, 189, 248, 0);   }
-        100% { box-shadow: 0 0 0 0   rgba(56, 189, 248, 0);    }
+        0%   { box-shadow: 0 0 0 0   rgba(var(--accent-rgb), 0.45); }
+        70%  { box-shadow: 0 0 0 15px rgba(var(--accent-rgb), 0);   }
+        100% { box-shadow: 0 0 0 0   rgba(var(--accent-rgb), 0);    }
     }
 
     .modal-overlay {
@@ -1007,17 +1032,17 @@
             <span id="time-greeting">Welcome back,</span>
             <span class="editable-name" id="user-name" contenteditable="true" onblur="saveUserName()" title="Double click to edit your name">Planner</span>
             <!-- FEATURE 1: Font Picker Button -->
-            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style">⚡</button>
+            <button class="greeting-font-btn" onclick="toggleFontPicker(event)" title="Change greeting font style"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg></button>
         </div>
         <div class="ai-motivation">
             <span id="ai-quote">Initializing motivation matrix...</span>
-            <button class="refresh-quote-btn" onclick="generateAIQuote()" title="Refresh motivation quote">🔄</button>
+            <button class="refresh-quote-btn" onclick="generateAIQuote()" title="Refresh motivation quote"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button>
         </div>
         <!-- FEATURE 2: AI Planner Feedback -->
         <div class="ai-feedback-section">
             <div class="ai-feedback-title">
                 <span>🤖 AI Productivity Coach</span>
-                <button class="ai-feedback-refresh-btn" id="feedback-refresh-btn" onclick="generateAIFeedback()" title="Refresh feedback">🔄</button>
+                <button class="ai-feedback-refresh-btn" id="feedback-refresh-btn" onclick="generateAIFeedback()" title="Refresh feedback"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button>
             </div>
             <div class="ai-feedback-content" id="ai-feedback-content">
                 <span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;">Click 🔄 to get personalized feedback on your day...</span>
@@ -1350,6 +1375,8 @@
         }
         root.style.setProperty('--accent', activeAccent);
         root.style.setProperty('--accent-hover', activeAccent);
+        const accentRgb = hexToRgb(activeAccent);
+        root.style.setProperty('--accent-rgb', `${accentRgb.r}, ${accentRgb.g}, ${accentRgb.b}`);
         const rgb = hexToRgb(activeCardColor);
         root.style.setProperty('--bg-card', `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${activeCardOpacity})`);
         if(savedBgImage) {
