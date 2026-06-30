@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,19 +7,740 @@
     <style>
         :root {
             --bg-main: #0f172a;
-            --bg-card: rgba(30, 41, 59, 0.85); /* Default with initial transparency */
+            --bg-card: rgba(30, 41, 59, 1);
             --accent: #38bdf8;
             --accent-hover: #0ea5e9;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #334155;
-            --bg-overlay: rgba(15, 23, 42, 0.4);
+            --card-opacity: 1;
         }
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        transition: background-color 0.2s, border-color 0.2s;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: -1;
+            display: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            z-index: 1;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .greeting-section h1 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .name-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--accent);
+            color: var(--text-main);
+            font-size: 1.8rem;
+            font-weight: bold;
+            width: 140px;
+            padding: 0 5px;
+            outline: none;
+        }
+
+        .motivation-banner {
+            background: rgba(56, 189, 248, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            border-radius: 4px 12px 12px 4px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .views-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .view-btn.active, .view-btn:hover {
+            background: var(--accent);
+            color: #0f172a;
+            border-color: var(--accent);
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-layout { grid-template-columns: 1fr; }
+        }
+
+        .main-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .sidebar-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .planner-view { display: none; }
+        .planner-view.active { display: block; }
+
+        /* Form Inputs */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+        input, select, textarea {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 6px;
+            outline: none;
+        }
+        input:focus { border-color: var(--accent); }
+
+        .row-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .submit-btn {
+            background: var(--accent);
+            color: #0f172a;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .submit-btn:hover { background: var(--accent-hover); }
+
+        /* Suggestions Box */
+        .suggestions-container {
+            border: 1px dashed var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.3);
+        }
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .sug-chip {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--text-main);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .sug-chip:hover {
+            background: var(--accent);
+            color: #0f172a;
+        }
+
+        /* Tasks with Checkbox */
+        .item-list { list-style: none; margin-top: 10px; }
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+        }
+        .item-left { display: flex; align-items: center; gap: 12px; }
+        .item-text-group { display: flex; flex-direction: column; gap: 2px; }
+        .item-title { font-weight: 500; }
+        .item-title.completed { text-decoration: line-through; color: var(--text-muted); }
+        .item-meta { font-size: 0.75rem; color: var(--text-muted); }
+        .delete-btn {
+            background: transparent;
+            color: #ef4444;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Calendar Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .cal-header {
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .cal-day {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border);
+            aspect-ratio: 1;
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .cal-day:hover, .cal-day.selected { border-color: var(--accent); }
+        .cal-day.today { background: rgba(56, 189, 248, 0.15); border-color: var(--accent); }
+        .dot-indicator {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            align-self: center;
+        }
+
+        /* Floating Heart Portal Modal */
+        .heart-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background: #f43f5e;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+            border: none;
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+        .heart-btn:hover { transform: scale(1.1); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 10px;
+        }
+        .close-modal { background: transparent; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="bg-overlay" id="custom-bg-blur"></div>
+
+<div class="container">
+    <header>
+        <div class="greeting-section">
+            <h1 id="time-greeting">Good Horizon,</h1>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="text" id="username-display" class="name-input" value="Ikram" onchange="saveUsername()">
+                <span style="font-size: 1.8rem; font-weight: bold;">Planner</span>
+            </div>
+        </div>
+        <div class="views-nav">
+            <button class="view-btn active" onclick="switchView('day')">Day</button>
+            <button class="view-btn" onclick="switchView('month')">Month</button>
+            <button class="view-btn" onclick="switchView('year')">Year Goals</button>
+        </div>
+    </header>
+
+    <div class="motivation-banner">
+        <div>
+            <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent);">Focus Spark</p>
+            <p id="quote-display" style="font-style: italic; margin-top: 4px;">"Your potential is unlocked the moment you decide to map the execution."</p>
+        </div>
+        <button onclick="cycleQuote()" style="background:transparent; border:none; color:var(--accent); cursor:pointer; font-size:1.2rem; padding: 5px;">🔄</button>
+    </div>
+
+    <div class="grid-layout">
+        <main class="main-card" id="el-main-card">
+            
+            <!-- DAY VIEW -->
+            <div id="day-view" class="planner-view active">
+                <div class="view-title-header">
+                    <h2 id="day-view-title">Today's Schedule</h2>
+                </div>
+                <ul id="day-tasks-list" class="item-list"></ul>
+            </div>
+
+            <!-- MONTH VIEW -->
+            <div id="month-view" class="planner-view">
+                <div class="view-title-header">
+                    <h2>Calendar Matrix</h2>
+                </div>
+                <div class="calendar-grid" id="calendar-matrix-container"></div>
+            </div>
+
+            <!-- YEAR VIEW -->
+            <div id="year-view" class="planner-view">
+                <div class="view-title-header">
+                    <h2>Strategic Annual Targets</h2>
+                </div>
+                <div class="form-group">
+                    <label>Add Macro Year Goal</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="year-goal-input" placeholder="e.g., Launch clothing brand..." style="flex:1;">
+                        <button class="submit-btn" onclick="addYearGoal()" style="margin:0; padding:0 20px;">Add</button>
+                    </div>
+                </div>
+                <ul id="year-goals-list" class="item-list"></ul>
+            </div>
+        </main>
+
+        <aside class="sidebar-card" id="el-sidebar-card">
+            <!-- SUGGESTIONS TAB -->
+            <div class="suggestions-container">
+                <label>Quick Suggestions Engine</label>
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <input type="text" id="sug-input" placeholder="Custom template item..." style="padding:6px; font-size:0.85rem; flex:1;">
+                    <button onclick="addCustomSuggestion()" style="background:var(--accent); border:none; border-radius:4px; padding:0 10px; cursor:pointer;">+</button>
+                </div>
+                <div class="suggestion-chips" id="suggestion-chips-vault"></div>
+            </div>
+
+            <h3>Task & Focus Engine</h3>
+            <div class="form-group">
+                <label for="task-title">Action Item Title</label>
+                <input type="text" id="task-title" placeholder="Workout, Coding block...">
+            </div>
+            <div class="row-inputs">
+                <div class="form-group">
+                    <label for="task-date">Target Date</label>
+                    <input type="date" id="task-date">
+                </div>
+                <div class="form-group">
+                    <label for="task-duration">Duration (Hours)</label>
+                    <input type="number" id="task-duration" min="0.5" max="24" step="0.5" value="1">
+                </div>
+            </div>
+            <div class="row-inputs">
+                <div class="form-group">
+                    <label for="task-repeat">Recurrence</label>
+                    <select id="task-repeat">
+                        <option value="none">One-time</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-repeat-count">Repeat Count</label>
+                    <input type="number" id="task-repeat-count" min="1" max="365" value="1">
+                </div>
+            </div>
+            <button class="submit-btn" onclick="saveNewTask()">Deploy to Schedule</button>
+        </aside>
+    </div>
+</div>
+
+<button class="heart-btn" onclick="toggleModal(true)">❤️</button>
+
+<div class="modal-overlay" id="theme-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Custom Theme System</h3>
+            <button class="close-modal" onclick="toggleModal(false)">✕</button>
+        </div>
+        <div class="form-group">
+            <label>Interface Base Background Color</label>
+            <input type="color" id="cfg-bg" value="#0f172a" onchange="applyCustomThemes()">
+        </div>
+        <div class="form-group">
+            <label>Accent Highlights Color</label>
+            <input type="color" id="cfg-accent" value="#38bdf8" onchange="applyCustomThemes()">
+        </div>
+        <div class="form-group">
+            <label>Card Elements Background Color</label>
+            <input type="color" id="cfg-card" value="#1e293b" onchange="applyCustomThemes()">
+        </div>
+        <div class="form-group">
+            <label>Card Transparency/Opacity (<span id="opacity-val">100</span>%)</label>
+            <input type="range" id="cfg-opacity" min="10" max="100" value="100" oninput="applyCustomThemes()">
+        </div>
+        <div class="form-group">
+            <label>Upload Custom Background Wallpaper</label>
+            <input type="file" id="cfg-wallpaper" accept="image/*" onchange="uploadWallpaper()">
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedDateStr = new Date().toISOString().split('T')[0];
+    let tasks = JSON.parse(localStorage.getItem('planner_tasks')) || [];
+    let yearGoals = JSON.parse(localStorage.getItem('planner_year_goals')) || [];
+    let suggestions = JSON.parse(localStorage.getItem('planner_suggestions')) || ['Gym Workout', 'Read Book', 'Python Block', 'German Study'];
+    
+    const quotes = [
+        "Your potential is unlocked the moment you decide to map the execution.",
+        "Small hourly wins stack up into massive annual victories.",
+        "Consistency always beats intensity. Show up for your goals today.",
+        "Design your day, protect your focus, block out the noise."
+    ];
+
+    document.getElementById('task-date').value = selectedDateStr;
+    if(localStorage.getItem('planner_username')) {
+        document.getElementById('username-display').value = localStorage.getItem('planner_username');
     }
+
+    function saveUsername() {
+        localStorage.setItem('planner_username', document.getElementById('username-display').value);
+        evaluateGreeting();
+    }
+
+    function evaluateGreeting() {
+        const hrs = new Date().getHours();
+        let greeting = "Good morning,";
+        if(hrs >= 12 && hrs < 17) greeting = "Good afternoon,";
+        if(hrs >= 17 && hrs < 22) greeting = "Good evening,";
+        if(hrs >= 22 || hrs < 5) greeting = "Good night,";
+        document.getElementById('time-greeting').innerText = greeting;
+    }
+
+    function cycleQuote() {
+        const idx = Math.floor(Math.random() * quotes.length);
+        document.getElementById('quote-display').innerText = quotes[idx];
+    }
+
+    function toggleModal(show) {
+        document.getElementById('theme-modal').style.display = show ? 'flex' : 'none';
+    }
+
+    function switchView(viewName) {
+        document.querySelectorAll('.planner-view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`${viewName}-view`).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if(viewName === 'month') renderCalendarMatrix();
+        if(viewName === 'day') renderDayTasks();
+        if(viewName === 'year') renderYearGoals();
+    }
+
+    function addCustomSuggestion() {
+        const input = document.getElementById('sug-input');
+        const val = input.value.trim();
+        if(!val) return;
+        suggestions.push(val);
+        localStorage.setItem('planner_suggestions', JSON.stringify(suggestions));
+        input.value = '';
+        renderSuggestions();
+    }
+
+    function renderSuggestions() {
+        const vault = document.getElementById('suggestion-chips-vault');
+        vault.innerHTML = '';
+        suggestions.forEach(s => {
+            const chip = document.createElement('span');
+            chip.className = 'sug-chip';
+            chip.innerText = s;
+            chip.onclick = () => { document.getElementById('task-title').value = s; };
+            vault.appendChild(chip);
+        });
+    }
+
+    function saveNewTask() {
+        const title = document.getElementById('task-title').value.trim();
+        const dateBase = document.getElementById('task-date').value;
+        const duration = document.getElementById('task-duration').value;
+        const repeat = document.getElementById('task-repeat').value;
+        const count = parseInt(document.getElementById('task-repeat-count').value) || 1;
+
+        if (!title || !dateBase) return alert('Provide title and date.');
+
+        let currentDate = new Date(dateBase + 'T00:00:00');
+
+        for (let i = 0; i < count; i++) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            tasks.push({
+                id: Date.now() + Math.random().toString(36).substr(2, 5),
+                title,
+                date: dateStr,
+                duration,
+                repeatType: repeat,
+                instance: i + 1,
+                completed: false
+            });
+            if (repeat === 'daily') currentDate.setDate(currentDate.getDate() + 1);
+            else if (repeat === 'weekly') currentDate.setDate(currentDate.getDate() + 7);
+            else break;
+        }
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+        document.getElementById('task-title').value = '';
+        renderDayTasks();
+        renderCalendarMatrix();
+    }
+
+    function toggleTaskCheck(id) {
+        const target = tasks.find(t => t.id === id);
+        if(target) {
+            target.completed = !target.completed;
+            localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+            renderDayTasks();
+        }
+    }
+
+    function deleteTask(id) {
+        tasks = tasks.filter(t => t.id !== id);
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+        renderDayTasks();
+        renderCalendarMatrix();
+    }
+
+    function renderDayTasks() {
+        const listContainer = document.getElementById('day-tasks-list');
+        listContainer.innerHTML = '';
+        const dayTitleDate = new Date(selectedDateStr + 'T00:00:00');
+        document.getElementById('day-view-title').innerText = `Schedule for ${dayTitleDate.toLocaleDateString('en-US', {month:'long', day:'numeric'})}`;
+
+        const filtered = tasks.filter(t => t.date === selectedDateStr);
+        if(filtered.length === 0) {
+            listContainer.innerHTML = `<li style="color:var(--text-muted); font-style:italic;">No activities plotted.</li>`;
+            return;
+        }
+
+        filtered.forEach(t => {
+            const li = document.createElement('li');
+            li.className = 'item-row';
+            li.innerHTML = `
+                <div class="item-left">
+                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTaskCheck('${t.id}')">
+                    <div class="item-text-group">
+                        <span class="item-title ${t.completed ? 'completed' : ''}">${t.title}</span>
+                        <span class="item-meta">⏱️ ${t.duration} hrs ${t.repeatType !== 'none' ? `| Inst. #${t.instance}` : ''}</span>
+                    </div>
+                </div>
+                <button class="delete-btn" onclick="deleteTask('${t.id}')">✕</button>
+            `;
+            listContainer.appendChild(li);
+        });
+    }
+
+    function renderCalendarMatrix() {
+        const container = document.getElementById('calendar-matrix-container');
+        container.innerHTML = '';
+        const now = new Date(selectedDateStr + 'T00:00:00');
+        const year = now.getFullYear();
+        const month = now.getMonth();
+
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(d => {
+            const h = document.createElement('div'); h.className = 'cal-header'; h.innerText = d; container.appendChild(h);
+        });
+
+        const firstDayIdx = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDayIdx; i++) container.appendChild(document.createElement('div'));
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        for (let day = 1; day <= totalDays; day++) {
+            const loopDateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day';
+            if (loopDateStr === todayStr) dayDiv.classList.add('today');
+            if (loopDateStr === selectedDateStr) dayDiv.classList.add('selected');
+            dayDiv.innerHTML = `<span>${day}</span>`;
+
+            if (tasks.some(t => t.date === loopDateStr)) {
+                const dot = document.createElement('div'); dot.className = 'dot-indicator'; dayDiv.appendChild(dot);
+            }
+            dayDiv.onclick = () => {
+                selectedDateStr = loopDateStr;
+                document.getElementById('task-date').value = selectedDateStr;
+                switchView('day');
+            };
+            container.appendChild(dayDiv);
+        }
+    }
+
+    function addYearGoal() {
+        const input = document.getElementById('year-goal-input');
+        if(!input.value.trim()) return;
+        yearGoals.push({ id: Date.now().toString(), text: input.value.trim() });
+        localStorage.setItem('planner_year_goals', JSON.stringify(yearGoals));
+        input.value = '';
+        renderYearGoals();
+    }
+
+    function deleteYearGoal(id) {
+        yearGoals = yearGoals.filter(g => g.id !== id);
+        localStorage.setItem('planner_year_goals', JSON.stringify(yearGoals));
+        renderYearGoals();
+    }
+
+    function renderYearGoals() {
+        const list = document.getElementById('year-goals-list');
+        list.innerHTML = '';
+        if(yearGoals.length === 0) {
+            list.innerHTML = `<li style="color:var(--text-muted); font-style:italic;">No targets logged.</li>`;
+            return;
+        }
+        yearGoals.forEach(g => {
+            const li = document.createElement('li');
+            li.className = 'item-row';
+            li.innerHTML = `<span>🎯 ${g.text}</span><button class="delete-btn" onclick="deleteYearGoal('${g.id}')">✕</button>`;
+            list.appendChild(li);
+        });
+    }
+
+    function applyCustomThemes() {
+        const bg = document.getElementById('cfg-bg').value;
+        const accent = document.getElementById('cfg-accent').value;
+        const cardBase = document.getElementById('cfg-card').value;
+        const opacity = document.getElementById('cfg-opacity').value;
+
+        document.getElementById('opacity-val').innerText = opacity;
+
+        const r = document.documentElement.style;
+        r.setProperty('--bg-main', bg);
+        r.setProperty('--accent', accent);
+        
+        // Convert hex to rgb for opacity merging
+        let c = cardBase.replace('#','');
+        let r_val = parseInt(c.substring(0,2), 16);
+        let g_val = parseInt(c.substring(2,4), 16);
+        let b_val = parseInt(c.substring(4,6), 16);
+        
+        r.setProperty('--bg-card', `rgba(${r_val}, ${g_val}, ${b_val}, ${opacity / 100})`);
+        
+        localStorage.setItem('theme_config', JSON.stringify({bg, accent, cardBase, opacity}));
+    }
+
+    function uploadWallpaper() {
+        const file = document.getElementById('cfg-wallpaper').files[0];
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            document.body.style.backgroundImage = `url(${reader.result})`;
+            document.getElementById('custom-bg-blur').style.display = 'block';
+            localStorage.setItem('theme_wallpaper', reader.result);
+        }
+        if(file) reader.readAsDataURL(file);
+    }
+
+    function loadSavedTheme() {
+        const cfg = JSON.parse(localStorage.getItem('theme_config'));
+        if(cfg) {
+            document.getElementById('cfg-bg').value = cfg.bg;
+            document.getElementById('cfg-accent').value = cfg.accent;
+            document.getElementById('cfg-card').value = cfg.cardBase;
+            document.getElementById('cfg-opacity').value = cfg.opacity;
+            applyCustomThemes();
+        }
+        const wp = localStorage.getItem('theme_wallpaper');
+        if(wp) {
+            document.body.style.backgroundImage = `url(${wp})`;
+            document.getElementById('custom-bg-blur').style.display = 'block';
+        }
+    }
+
+    evaluateGreeting();
+    renderSuggestions();
+    renderDayTasks();
+    loadSavedTheme();
+</script>
+</body>
+</html>
