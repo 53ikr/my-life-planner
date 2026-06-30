@@ -489,6 +489,13 @@
         cursor: grab;
         user-select: none;
         touch-action: none;
+        transition: box-shadow 0.2s ease, transform 0.05s linear, left 0.05s linear, top 0.05s linear;
+        will-change: left, top, transform;
+    }
+    .placed-sticker.dragging-active {
+        transition: box-shadow 0.2s ease;
+        cursor: grabbing;
+        filter: drop-shadow(0 8px 16px rgba(0,0,0,0.45));
     }
     .placed-sticker.locked {
         cursor: default;
@@ -500,12 +507,28 @@
         object-fit: contain;
         display: block;
     }
+    /* Editing controls (controls/handles) only visible while sticker is selected */
+    .placed-sticker .sticker-controls,
+    .placed-sticker .sticker-resize-handle,
+    .placed-sticker .sticker-rotate-handle {
+        display: none;
+    }
+    .placed-sticker.selected {
+        outline: 2px dashed var(--accent);
+        outline-offset: 4px;
+    }
+    .placed-sticker.selected .sticker-controls {
+        display: flex;
+    }
+    .placed-sticker.selected .sticker-resize-handle,
+    .placed-sticker.selected .sticker-rotate-handle {
+        display: block;
+    }
     .sticker-controls {
         position: absolute;
         top: -30px;
         left: 50%;
         transform: translateX(-50%);
-        display: flex;
         gap: 4px;
         background: rgba(15,23,42,0.9);
         border: 1px solid #334155;
@@ -709,7 +732,7 @@
         border-radius: 6px;
         margin-bottom: 8px;
         border: 1px solid var(--border);
-        transition: transform 0.2s;
+        transition: transform 0.25s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s, opacity 0.2s;
     }
     .item-row:hover {
         transform: translateY(-1px);
@@ -811,6 +834,9 @@
     }
     .item-row.drag-over {
         border-top: 2px solid var(--accent);
+    }
+    .item-row.flip-move {
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
     }
     .edit-input {
         background: rgba(0,0,0,0.2);
@@ -949,6 +975,55 @@
     .color-chip.active {
         border-color: #ffffff;
         transform: scale(1.15);
+    }
+    .color-chip.custom-chip {
+        position: relative;
+    }
+    .color-chip.custom-chip::after {
+        content: "";
+        position: absolute;
+        top: -2px; right: -2px;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        border: 1px solid rgba(0,0,0,0.4);
+    }
+
+    .custom-color-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .custom-color-row input[type="color"] {
+        flex: 1;
+        padding: 0;
+        height: 32px;
+        cursor: pointer;
+    }
+    .custom-color-confirm-btn,
+    .custom-color-save-btn {
+        border: none;
+        border-radius: 6px;
+        padding: 0 12px;
+        height: 32px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: filter 0.2s;
+    }
+    .custom-color-confirm-btn {
+        background: rgba(56,189,248,0.15);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+    }
+    .custom-color-save-btn {
+        background: var(--accent);
+        color: #0f172a;
+    }
+    .custom-color-confirm-btn:hover,
+    .custom-color-save-btn:hover {
+        filter: brightness(1.1);
     }
 
     .opacity-slider-wrapper {
@@ -1248,9 +1323,8 @@
         <hr style="border:0; border-top:1px solid var(--border); margin: 10px 0;">
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <button onclick="clearAllPlacedStickers()" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:0.82rem;">🗑️ Clear All Placed</button>
-            <button onclick="saveAllStickers()" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:0.82rem;">💾 Save & Lock All</button>
         </div>
-        <p style="color:var(--text-muted); font-size:0.75rem; margin-top:8px;">🖱️ Drag to move · Corner handles to resize &amp; rotate · Flip buttons in toolbar · Save locks position</p>
+        <p style="color:var(--text-muted); font-size:0.75rem; margin-top:8px;">🖱️ Click a sticker to select it, drag to move · Corner handles to resize &amp; rotate · Flip buttons in toolbar · Click outside to auto-save and deselect</p>
     </div>
 </div>
 
@@ -1275,7 +1349,11 @@
 
         <div class="form-group">
             <label>Custom Accent Color Choice</label>
-            <input type="color" id="custom-accent-color" oninput="applyCustomAccent(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+            <div class="custom-color-row">
+                <input type="color" id="custom-accent-color">
+                <button type="button" class="custom-color-confirm-btn" onclick="confirmCustomAccent()" title="Apply this color">✓ Check</button>
+                <button type="button" class="custom-color-save-btn" onclick="saveCustomAccent()" title="Save to palette">💾 Save</button>
+            </div>
         </div>
 
         <hr style="border: 0; border-top: 1px solid var(--border);">
@@ -1288,15 +1366,19 @@
 
         <div class="form-group">
             <label>Custom Card Color Choice</label>
-            <input type="color" id="custom-card-color" oninput="applyCustomCardColor(this.value)" style="padding:0; width:100%; height:32px; cursor:pointer;">
+            <div class="custom-color-row">
+                <input type="color" id="custom-card-color">
+                <button type="button" class="custom-color-confirm-btn" onclick="confirmCustomCardColor()" title="Apply this color">✓ Check</button>
+                <button type="button" class="custom-color-save-btn" onclick="saveCustomCardColor()" title="Save to palette">💾 Save</button>
+            </div>
         </div>
 
         <!-- OPACITY SLIDER -->
         <div class="form-group">
-            <label id="opacity-slider-label">Card Transparency: 85%</label>
+            <label id="opacity-slider-label">Card Transparency: 15%</label>
             <div class="opacity-slider-wrapper">
                 <span>0%</span>
-                <input type="range" id="card-opacity-slider" min="0" max="100" value="85" oninput="applyCardOpacity(this.value)">
+                <input type="range" id="card-opacity-slider" min="0" max="100" value="15" oninput="applyCardOpacity(this.value)">
                 <span>100%</span>
             </div>
         </div>
@@ -1333,7 +1415,8 @@
     let currentThemeMode = localStorage.getItem('planner_theme_mode') || 'dark';
     let activeAccent = localStorage.getItem('planner_accent_color') || '#38bdf8';
     let activeCardColor = localStorage.getItem('planner_card_color') || '#1e293b';
-    let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity')) || 0.85;
+    let activeCardOpacity = parseFloat(localStorage.getItem('planner_card_opacity'));
+    if (isNaN(activeCardOpacity)) activeCardOpacity = 0.85;
     let savedBgImage = localStorage.getItem('planner_bg_image') || '';
 
     document.getElementById('task-date').value = selectedDateStr;
@@ -1398,16 +1481,40 @@
         document.getElementById('ai-quote').innerText = aiQuotes[randomIndex];
     }
 
-    // Presets
-    const colorPresets = ['#38bdf8','#10b981','#8b5cf6','#f43f5e','#f59e0b','#ffffff'];
-    const cardPresets = ['#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#cbd5e1'];
+    // =========================================================
+    // THEME / COLOR PALETTE (Expanded to 20 default colors + saved customs)
+    // =========================================================
+    const colorPresets = [
+        '#38bdf8','#10b981','#8b5cf6','#f43f5e','#f59e0b','#ffffff',
+        '#0ea5e9','#22c55e','#a855f7','#ec4899','#f97316','#eab308',
+        '#06b6d4','#84cc16','#d946ef','#ef4444','#14b8a6','#6366f1',
+        '#fb7185','#64748b'
+    ];
+    const cardPresets = [
+        '#1e293b','#0f172a','#18181b','#2d2438','#f8fafc','#cbd5e1',
+        '#312e81','#1e3a8a','#064e3b','#3f1d2b','#27272a','#44403c',
+        '#1a2e35','#3b0764','#422006','#0c4a6e','#365314','#4a044e',
+        '#1f2937','#e2e8f0'
+    ];
+
+    let customAccentColors = JSON.parse(localStorage.getItem('planner_custom_accent_colors')) || [];
+    let customCardColors = JSON.parse(localStorage.getItem('planner_custom_card_colors')) || [];
+
+    // Tracks the most recently CONFIRMED (✓ Check) custom colors.
+    // The Save button only persists these confirmed values, never the raw,
+    // unconfirmed value sitting in the <input type="color">.
+    let confirmedAccentColor = null;
+    let confirmedCardColor = null;
 
     function initializeThemeControls() {
         applyThemeStyles();
         renderThemeColorChips();
         renderCardColorChips();
-        document.getElementById('card-opacity-slider').value = Math.round(activeCardOpacity * 100);
-        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${Math.round((1 - activeCardOpacity) * 100)}%`;
+        // Slider value directly represents the transparency percentage:
+        // 0% = fully opaque, 100% = fully transparent.
+        const transparencyPercent = Math.round((1 - activeCardOpacity) * 100);
+        document.getElementById('card-opacity-slider').value = transparencyPercent;
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${transparencyPercent}%`;
     }
 
     function applyThemeStyles() {
@@ -1449,10 +1556,12 @@
     function renderThemeColorChips() {
         const container = document.getElementById('color-chips-container');
         container.innerHTML = '';
-        colorPresets.forEach(color => {
+        const allColors = [...colorPresets, ...customAccentColors];
+        allColors.forEach((color, idx) => {
             const chip = document.createElement('div');
-            chip.className = 'color-chip';
+            chip.className = 'color-chip' + (idx >= colorPresets.length ? ' custom-chip' : '');
             chip.style.backgroundColor = color;
+            chip.title = idx >= colorPresets.length ? 'Custom saved color' : '';
             if(color === activeAccent) chip.classList.add('active');
             chip.onclick = () => {
                 activeAccent = color;
@@ -1472,13 +1581,40 @@
         renderThemeColorChips();
     }
 
+    // Only called when the user explicitly presses ✓ Check.
+    // The <input type="color"> no longer applies live via oninput.
+    function confirmCustomAccent() {
+        const val = document.getElementById('custom-accent-color').value;
+        confirmedAccentColor = val;
+        applyCustomAccent(val);
+        showToast('Color applied! ✓', activeAccent);
+    }
+
+    // Only persists a color that has already been confirmed with ✓ Check.
+    function saveCustomAccent() {
+        if (!confirmedAccentColor) {
+            showToast('Press ✓ Check to confirm a color first', '#f59e0b');
+            return;
+        }
+        const val = confirmedAccentColor;
+        const allColors = [...colorPresets, ...customAccentColors];
+        if (!allColors.includes(val)) {
+            customAccentColors.push(val);
+            localStorage.setItem('planner_custom_accent_colors', JSON.stringify(customAccentColors));
+        }
+        renderThemeColorChips();
+        showToast('Custom color saved to palette! 💾', val);
+    }
+
     function renderCardColorChips() {
         const container = document.getElementById('card-chips-container');
         container.innerHTML = '';
-        cardPresets.forEach(color => {
+        const allColors = [...cardPresets, ...customCardColors];
+        allColors.forEach((color, idx) => {
             const chip = document.createElement('div');
-            chip.className = 'color-chip';
+            chip.className = 'color-chip' + (idx >= cardPresets.length ? ' custom-chip' : '');
             chip.style.backgroundColor = color;
+            chip.title = idx >= cardPresets.length ? 'Custom saved color' : '';
             if(color === activeCardColor) chip.classList.add('active');
             chip.onclick = () => {
                 activeCardColor = color;
@@ -1498,10 +1634,36 @@
         renderCardColorChips();
     }
 
+    // Only called when the user explicitly presses ✓ Check.
+    function confirmCustomCardColor() {
+        const val = document.getElementById('custom-card-color').value;
+        confirmedCardColor = val;
+        applyCustomCardColor(val);
+        showToast('Color applied! ✓', activeAccent);
+    }
+
+    // Only persists a color that has already been confirmed with ✓ Check.
+    function saveCustomCardColor() {
+        if (!confirmedCardColor) {
+            showToast('Press ✓ Check to confirm a color first', '#f59e0b');
+            return;
+        }
+        const val = confirmedCardColor;
+        const allColors = [...cardPresets, ...customCardColors];
+        if (!allColors.includes(val)) {
+            customCardColors.push(val);
+            localStorage.setItem('planner_custom_card_colors', JSON.stringify(customCardColors));
+        }
+        renderCardColorChips();
+        showToast('Custom color saved to palette! 💾', activeAccent);
+    }
+
+    // Slider value = transparency percentage (0% opaque -> 100% fully transparent).
     function applyCardOpacity(val) {
-        activeCardOpacity = parseFloat(val) / 100;
+        const transparencyPercent = parseFloat(val);
+        activeCardOpacity = 1 - (transparencyPercent / 100);
         localStorage.setItem('planner_card_opacity', activeCardOpacity);
-        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${100 - val}%`;
+        document.getElementById('opacity-slider-label').innerText = `Card Transparency: ${transparencyPercent}%`;
         applyThemeStyles();
     }
 
@@ -1688,6 +1850,42 @@
         });
     }
 
+    // =========================================================
+    // SMOOTH DRAG-REORDER (FLIP animation technique)
+    // =========================================================
+    function captureListPositions(listEl) {
+        const positions = new Map();
+        Array.from(listEl.children).forEach(child => {
+            if (child.dataset && child.dataset.taskId) {
+                positions.set(child.dataset.taskId, child.getBoundingClientRect());
+            }
+        });
+        return positions;
+    }
+
+    function playFlipAnimation(listEl, firstPositions) {
+        Array.from(listEl.children).forEach(child => {
+            const id = child.dataset && child.dataset.taskId;
+            if (!id) return;
+            const first = firstPositions.get(id);
+            if (!first) return;
+            const last = child.getBoundingClientRect();
+            const deltaY = first.top - last.top;
+            if (deltaY) {
+                child.style.transform = `translateY(${deltaY}px)`;
+                child.style.transition = 'none';
+                requestAnimationFrame(() => {
+                    child.classList.add('flip-move');
+                    child.style.transform = '';
+                    setTimeout(() => {
+                        child.classList.remove('flip-move');
+                        child.style.transition = '';
+                    }, 320);
+                });
+            }
+        });
+    }
+
     function attachDragHandlers(li) {
         li.addEventListener('dragstart', (e) => {
             li.classList.add('dragging');
@@ -1701,6 +1899,25 @@
         li.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
+            if (li.classList.contains('dragging')) return;
+
+            const listEl = document.getElementById('day-tasks-list');
+            const draggingEl = listEl.querySelector('.item-row.dragging');
+            if (!draggingEl || draggingEl === li) return;
+
+            // Determine whether to insert before or after based on cursor position
+            const rect = li.getBoundingClientRect();
+            const offset = e.clientY - rect.top - rect.height / 2;
+
+            const firstPositions = captureListPositions(listEl);
+            if (offset < 0) {
+                listEl.insertBefore(draggingEl, li);
+            } else {
+                listEl.insertBefore(draggingEl, li.nextSibling);
+            }
+            playFlipAnimation(listEl, firstPositions);
+
+            document.querySelectorAll('#day-tasks-list .item-row').forEach(row => row.classList.remove('drag-over'));
             li.classList.add('drag-over');
         });
         li.addEventListener('dragleave', () => {
@@ -1709,29 +1926,20 @@
         li.addEventListener('drop', (e) => {
             e.preventDefault();
             li.classList.remove('drag-over');
-            const draggedId = e.dataTransfer.getData('text/plain');
-            const targetId = li.dataset.taskId;
-            if (draggedId === targetId) return;
-            reorderTasks(draggedId, targetId);
+            // The DOM has already been reordered live during dragover.
+            // Persist the new order from the current DOM sequence.
+            const listEl = document.getElementById('day-tasks-list');
+            const newOrderIds = Array.from(listEl.children)
+                .filter(c => c.dataset && c.dataset.taskId)
+                .map(c => c.dataset.taskId);
+
+            const otherTasks = tasks.filter(t => t.date !== selectedDateStr);
+            const dayTasksMap = new Map(tasks.filter(t => t.date === selectedDateStr).map(t => [t.id, t]));
+            const reorderedDayTasks = newOrderIds.map(id => dayTasksMap.get(id)).filter(Boolean);
+            tasks = [...otherTasks, ...reorderedDayTasks];
+
+            localStorage.setItem('planner_tasks', JSON.stringify(tasks));
         });
-    }
-
-    function reorderTasks(draggedId, targetId) {
-        const dayTaskIds = tasks.filter(t => t.date === selectedDateStr).map(t => t.id);
-        const fromIdx = dayTaskIds.indexOf(draggedId);
-        const toIdx = dayTaskIds.indexOf(targetId);
-        if (fromIdx === -1 || toIdx === -1) return;
-        dayTaskIds.splice(toIdx, 0, dayTaskIds.splice(fromIdx, 1)[0]);
-
-        // Rebuild the full tasks array so the reordered day-tasks appear
-        // in their new order, keeping tasks from other dates untouched.
-        const otherTasks = tasks.filter(t => t.date !== selectedDateStr);
-        const dayTasksMap = new Map(tasks.filter(t => t.date === selectedDateStr).map(t => [t.id, t]));
-        const reorderedDayTasks = dayTaskIds.map(id => dayTasksMap.get(id));
-        tasks = [...otherTasks, ...reorderedDayTasks];
-
-        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
-        renderDayTasks();
     }
 
     function editTask(id) {
@@ -1880,18 +2088,29 @@
             const opt = document.createElement('div');
             opt.className = 'font-option' + (i === activeGreetingFontIndex ? ' selected' : '');
             opt.onclick = () => selectGreetingFont(i);
-            // Demonstration (styled in the actual font) is on the LEFT,
-            // the plain style name label is on the RIGHT.
-            opt.innerHTML = `
-                <div class="font-option-row">
-                    <span class="font-option-preview" style="
-                        font-family:${f.font};
-                        font-weight:${f.weight};
-                        font-style:${f.style};
-                    ">Good Morning ✨</span>
-                    <span class="font-option-label">${f.label}</span>
-                </div>
-            `;
+
+            const row = document.createElement('div');
+            row.className = 'font-option-row';
+
+            // Demonstration (styled in the actual font) is on the LEFT.
+            const preview = document.createElement('span');
+            preview.className = 'font-option-preview';
+            preview.textContent = 'Good Morning ✨';
+            // Set each font property directly via the CSSOM (with !important)
+            // so every preview reliably renders in its own distinct font,
+            // regardless of any other selector specificity in the page.
+            preview.style.setProperty('font-family', f.font, 'important');
+            preview.style.setProperty('font-weight', f.weight, 'important');
+            preview.style.setProperty('font-style', f.style, 'important');
+            row.appendChild(preview);
+
+            // Plain style-name label on the RIGHT.
+            const label = document.createElement('span');
+            label.className = 'font-option-label';
+            label.textContent = f.label;
+            row.appendChild(label);
+
+            opt.appendChild(row);
             container.appendChild(opt);
         });
     }
@@ -1914,11 +2133,11 @@
         // Also apply to any static span after user-name (the "Planner" label if separate)
         targets.forEach(el => {
             if (!el) return;
-            el.style.fontFamily = f.font;
-            el.style.fontWeight = f.weight;
-            el.style.fontStyle = f.style;
+            el.style.setProperty('font-family', f.font, 'important');
+            el.style.setProperty('font-weight', f.weight, 'important');
+            el.style.setProperty('font-style', f.style, 'important');
             if (animate) {
-                el.style.transition = 'font-family 0.3s ease, opacity 0.2s';
+                el.style.transition = 'opacity 0.2s';
                 el.style.opacity = '0';
                 setTimeout(() => { el.style.opacity = '1'; }, 50);
             }
@@ -2081,6 +2300,9 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
     let activeDrag = null;
     let activeResize = null;
     let activeRotate = null;
+    let dragRAF = null;
+    let pendingDragData = null;
+    let selectedStickerId = null; // currently selected sticker (editing controls visible)
 
     function toggleStickerModal() {
         const modal = document.getElementById('sticker-modal-overlay');
@@ -2249,6 +2471,7 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         placedStickers.push(stickerData);
         renderPlacedSticker(stickerData);
         toggleStickerModal();
+        selectSticker(id);
         showToast('Sticker placed! Drag to move, use handles to resize & rotate.', '#7c3aed');
     }
 
@@ -2269,13 +2492,12 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         el.appendChild(img);
 
         if (!data.locked) {
-            // Controls toolbar
+            // Controls toolbar — only visible while sticker has the "selected" class (see CSS)
             const ctrl = document.createElement('div');
             ctrl.className = 'sticker-controls';
             ctrl.innerHTML = `
                 <button class="sticker-ctrl-btn" onclick="flipStickerH('${data.id}')" title="Flip Horizontal">↔️</button>
                 <button class="sticker-ctrl-btn" onclick="flipStickerV('${data.id}')" title="Flip Vertical">↕️</button>
-                <button class="sticker-ctrl-btn" onclick="lockSticker('${data.id}')" title="Save & Lock" style="color:#10b981;">💾</button>
                 <button class="sticker-ctrl-btn" onclick="removePlacedSticker('${data.id}')" title="Remove" style="color:#ef4444;">✕</button>
             `;
             el.appendChild(ctrl);
@@ -2294,7 +2516,7 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
             rotateHandle.addEventListener('mousedown', (e) => startRotate(e, data.id));
             el.appendChild(rotateHandle);
 
-            // Drag
+            // Drag (mousedown also selects the sticker)
             el.addEventListener('mousedown', (e) => startDrag(e, data.id));
         }
 
@@ -2321,21 +2543,48 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         el.style.transform = buildTransform(data);
     }
 
-    // DRAG
+    // ----- Selection state -----
+    // Selecting a sticker shows its editing controls/handles; selecting a
+    // different sticker (or clicking outside) deselects + saves the previous one.
+    function selectSticker(id) {
+        if (selectedStickerId === id) return;
+        if (selectedStickerId) {
+            const prevEl = document.getElementById(selectedStickerId);
+            if (prevEl) prevEl.classList.remove('selected');
+        }
+        selectedStickerId = id;
+        const el = document.getElementById(id);
+        if (el) el.classList.add('selected');
+    }
+
+    function deselectAllStickers(shouldSave) {
+        if (shouldSave === undefined) shouldSave = true;
+        if (selectedStickerId) {
+            const el = document.getElementById(selectedStickerId);
+            if (el) el.classList.remove('selected');
+            selectedStickerId = null;
+            if (shouldSave) savePlacedStickers();
+        }
+    }
+
+    // DRAG (smoothed via requestAnimationFrame for fluid motion)
     function startDrag(e, id) {
         if (e.target.classList.contains('sticker-ctrl-btn') ||
             e.target.classList.contains('sticker-resize-handle') ||
             e.target.classList.contains('sticker-rotate-handle')) return;
         e.preventDefault();
+        e.stopPropagation();
         const data = getStickerData(id);
         if (!data || data.locked) return;
+        selectSticker(id);
         activeDrag = {
             id,
             startX: e.pageX - data.x,
             startY: e.pageY - data.y
         };
-        document.getElementById(id).style.cursor = 'grabbing';
-        document.getElementById(id).style.zIndex = 600;
+        const el = document.getElementById(id);
+        el.classList.add('dragging-active');
+        el.style.zIndex = 600;
     }
 
     // RESIZE
@@ -2344,6 +2593,7 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         e.stopPropagation();
         const data = getStickerData(id);
         if (!data) return;
+        selectSticker(id);
         activeResize = {
             id,
             startX: e.pageX,
@@ -2359,11 +2609,21 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         e.stopPropagation();
         const data = getStickerData(id);
         if (!data) return;
+        selectSticker(id);
         const el = document.getElementById(id);
         const rect = el.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2 + window.scrollY;
         activeRotate = { id, centerX, centerY };
+    }
+
+    function scheduleDragFrame() {
+        if (dragRAF) return;
+        dragRAF = requestAnimationFrame(() => {
+            dragRAF = null;
+            if (!pendingDragData) return;
+            updateStickerElement(pendingDragData);
+        });
     }
 
     document.addEventListener('mousemove', (e) => {
@@ -2372,7 +2632,8 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
             if (!data) return;
             data.x = e.pageX - activeDrag.startX;
             data.y = e.pageY - activeDrag.startY;
-            updateStickerElement(data);
+            pendingDragData = data;
+            scheduleDragFrame();
         }
         if (activeResize) {
             const data = getStickerData(activeResize.id);
@@ -2398,9 +2659,10 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
     document.addEventListener('mouseup', () => {
         if (activeDrag) {
             const el = document.getElementById(activeDrag.id);
-            if (el) { el.style.cursor = 'grab'; el.style.zIndex = ''; }
+            if (el) { el.classList.remove('dragging-active'); el.style.zIndex = ''; }
             savePlacedStickers();
             activeDrag = null;
+            pendingDragData = null;
         }
         if (activeResize) { savePlacedStickers(); activeResize = null; }
         if (activeRotate) { savePlacedStickers(); activeRotate = null; }
@@ -2422,40 +2684,20 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
         savePlacedStickers();
     }
 
-    function lockSticker(id) {
-        const data = getStickerData(id);
-        if (!data) return;
-        data.locked = true;
-        savePlacedStickers();
-        // Re-render just this sticker
-        const existing = document.getElementById(id);
-        if (existing) existing.remove();
-        renderPlacedSticker(data);
-        showToast('Sticker locked in place! 🔒', '#10b981');
-    }
-
     function removePlacedSticker(id) {
         placedStickers = placedStickers.filter(s => s.id !== id);
         const el = document.getElementById(id);
         if (el) el.remove();
+        if (selectedStickerId === id) selectedStickerId = null;
         savePlacedStickers();
     }
 
     function clearAllPlacedStickers() {
         placedStickers = [];
+        selectedStickerId = null;
         document.getElementById('sticker-canvas-layer').innerHTML = '';
         savePlacedStickers();
         showToast('All stickers cleared.', '#ef4444');
-    }
-
-    function saveAllStickers() {
-        placedStickers.forEach(s => { s.locked = true; });
-        savePlacedStickers();
-        // Re-render all
-        document.getElementById('sticker-canvas-layer').innerHTML = '';
-        placedStickers.forEach(renderPlacedSticker);
-        showToast('All stickers saved & locked! 💾', '#10b981');
-        toggleStickerModal();
     }
 
     function savePlacedStickers() {
@@ -2467,6 +2709,24 @@ Do not use markdown, bullet points, or headers — just plain flowing text.`,
     function loadPlacedStickers() {
         placedStickers.forEach(renderPlacedSticker);
     }
+
+    // Auto-save + deselect sticker whenever the user clicks/taps outside any sticker.
+    // This both persists the position/size/rotation AND hides the editing controls,
+    // so the sticker visually returns to its normal placed appearance.
+    document.addEventListener('mousedown', (e) => {
+        if (activeDrag || activeResize || activeRotate) return; // mid-interaction, ignore
+        const clickedSticker = e.target.closest('.placed-sticker');
+        if (!clickedSticker) {
+            deselectAllStickers();
+        }
+    });
+    document.addEventListener('touchstart', (e) => {
+        if (activeDrag || activeResize || activeRotate) return;
+        const touchedSticker = e.target.closest('.placed-sticker');
+        if (!touchedSticker) {
+            deselectAllStickers();
+        }
+    });
 
     // =========================================================
     // SHARED TOAST UTILITY
