@@ -340,6 +340,12 @@
     .sticker-btn-fab:hover {
         transform: scale(1.15) rotate(-10deg);
     }
+    .sticker-btn-fab:active,
+    .sticker-btn-fab:focus {
+        background: var(--accent);
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+    }
 
     .sticker-modal-overlay {
         position: fixed;
@@ -775,6 +781,46 @@
         color: var(--text-muted);
     }
     .item-meta { font-size: 0.75rem; color: var(--text-muted); }
+    .edit-btn {
+        background: transparent;
+        color: var(--accent);
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 5px;
+    }
+    .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+    .drag-handle {
+        cursor: grab;
+        color: var(--text-muted);
+        font-size: 1rem;
+        padding: 0 6px 0 0;
+        user-select: none;
+        line-height: 1;
+    }
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+    .item-row.dragging {
+        opacity: 0.4;
+    }
+    .item-row.drag-over {
+        border-top: 2px solid var(--accent);
+    }
+    .edit-input {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--border);
+        color: var(--text-main);
+        padding: 6px 8px;
+        border-radius: 6px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+    .edit-input:focus { border-color: var(--accent); }
     .delete-btn {
         background: transparent;
         color: #ef4444;
@@ -816,6 +862,12 @@
     }
     .theme-btn-fab:hover {
         transform: scale(1.15) rotate(10deg);
+    }
+    .theme-btn-fab:active,
+    .theme-btn-fab:focus {
+        background: var(--accent);
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     /* Single shared pulse used by BOTH FABs — same duration so they beat in sync */
@@ -1045,7 +1097,7 @@
                 <button class="ai-feedback-refresh-btn" id="feedback-refresh-btn" onclick="generateAIFeedback()" title="Refresh feedback"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button>
             </div>
             <div class="ai-feedback-content" id="ai-feedback-content">
-                <span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem;">Click 🔄 to get personalized feedback on your day...</span>
+                <span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;">Click <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" style="width:14px; height:14px; vertical-align:middle;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> to get personalized feedback on your day...</span>
             </div>
         </div>
     </div>
@@ -1609,9 +1661,12 @@
         filtered.forEach(t => {
             const li = document.createElement('li');
             li.className = 'item-row';
+            li.draggable = true;
+            li.dataset.taskId = t.id;
             if (t.completed) li.classList.add('completed-task');
             li.innerHTML = `
                 <div class="item-left">
+                    <span class="drag-handle" title="Drag to reorder">⠿</span>
                     <label class="checkbox-container">
                         <input type="checkbox" ${t.completed ? 'checked' : ''} onclick="toggleTaskCompletion('${t.id}')">
                         <span class="checkmark"></span>
@@ -1621,10 +1676,90 @@
                         <span class="item-meta">⏱️ ${t.duration} hrs ${t.repeatType !== 'none' ? `| Inst. #${t.instance}` : ''}</span>
                     </div>
                 </div>
-                <button class="delete-btn" onclick="deleteTask('${t.id}')">✕</button>
+                <div class="item-actions">
+                    <button class="edit-btn" onclick="editTask('${t.id}')" title="Edit task">✏️</button>
+                    <button class="delete-btn" onclick="deleteTask('${t.id}')" title="Delete task">✕</button>
+                </div>
             `;
+            attachDragHandlers(li);
             listContainer.appendChild(li);
         });
+    }
+
+    function attachDragHandlers(li) {
+        li.addEventListener('dragstart', (e) => {
+            li.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', li.dataset.taskId);
+        });
+        li.addEventListener('dragend', () => {
+            li.classList.remove('dragging');
+            document.querySelectorAll('#day-tasks-list .item-row').forEach(row => row.classList.remove('drag-over'));
+        });
+        li.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            li.classList.add('drag-over');
+        });
+        li.addEventListener('dragleave', () => {
+            li.classList.remove('drag-over');
+        });
+        li.addEventListener('drop', (e) => {
+            e.preventDefault();
+            li.classList.remove('drag-over');
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const targetId = li.dataset.taskId;
+            if (draggedId === targetId) return;
+            reorderTasks(draggedId, targetId);
+        });
+    }
+
+    function reorderTasks(draggedId, targetId) {
+        const dayTaskIds = tasks.filter(t => t.date === selectedDateStr).map(t => t.id);
+        const fromIdx = dayTaskIds.indexOf(draggedId);
+        const toIdx = dayTaskIds.indexOf(targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        dayTaskIds.splice(toIdx, 0, dayTaskIds.splice(fromIdx, 1)[0]);
+
+        // Rebuild the full tasks array so the reordered day-tasks appear
+        // in their new order, keeping tasks from other dates untouched.
+        const otherTasks = tasks.filter(t => t.date !== selectedDateStr);
+        const dayTasksMap = new Map(tasks.filter(t => t.date === selectedDateStr).map(t => [t.id, t]));
+        const reorderedDayTasks = dayTaskIds.map(id => dayTasksMap.get(id));
+        tasks = [...otherTasks, ...reorderedDayTasks];
+
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+        renderDayTasks();
+    }
+
+    function editTask(id) {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+        const li = document.querySelector(`#day-tasks-list .item-row[data-task-id="${id}"]`);
+        if (!li) return;
+        li.draggable = false;
+        li.innerHTML = `
+            <div class="item-left" style="flex:1; gap: 10px;">
+                <input type="text" class="edit-input" id="edit-title-${id}" value="${task.title.replace(/"/g, '&quot;')}" style="flex:1;">
+                <input type="number" class="edit-input" id="edit-duration-${id}" value="${task.duration}" min="0.5" max="24" step="0.5" style="width:80px;">
+            </div>
+            <div class="item-actions">
+                <button class="edit-btn" onclick="saveEditedTask('${id}')" title="Save changes">✔️</button>
+                <button class="delete-btn" onclick="renderDayTasks()" title="Cancel">✕</button>
+            </div>
+        `;
+    }
+
+    function saveEditedTask(id) {
+        const titleInput = document.getElementById(`edit-title-${id}`);
+        const durationInput = document.getElementById(`edit-duration-${id}`);
+        const newTitle = titleInput.value.trim();
+        const newDuration = durationInput.value;
+        if (!newTitle) return;
+        tasks = tasks.map(t => t.id === id ? { ...t, title: newTitle, duration: newDuration } : t);
+        localStorage.setItem('planner_tasks', JSON.stringify(tasks));
+        renderDayTasks();
+        renderCalendarMatrix();
     }
 
     function deleteTask(id) {
